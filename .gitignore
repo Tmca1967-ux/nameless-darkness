@@ -1,0 +1,11 @@
+# Documentos e dados — NUNCA publicar (ficam protegidos no Supabase Storage)
+*.pdf
+*.xlsx
+~$*
+
+# Ficheiros locais / de desenvolvimento (não fazem parte do site)
+.DS_Store
+.claude/
+Abrir Procedimentos.command
+supabase-schema.sql
+logo.png

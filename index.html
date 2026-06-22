@@ -1,0 +1,3806 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d5c75">
+<title>SU Connect · Serviço de Urgência</title>
+<link rel="icon" href="logo.jpg?v=3">
+<link rel="apple-touch-icon" href="logo.jpg?v=3">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+  :root{
+    --bg:#eef3f5;
+    --surface:#ffffff;
+    --surface-2:#f5f9fa;
+    --line:#d8e2e6;
+    --primary:#0d5c75;       /* azul hospitalar */
+    --primary-dark:#0a4759;
+    --primary-soft:#e3eef2;
+    --accent:#1c8c6b;        /* verde calmo */
+    --text:#15303a;
+    --muted:#5a727c;
+    --vigente:#1c8c6b;
+    --vigente-bg:#e4f4ee;
+    --revisao:#b87503;
+    --revisao-bg:#fdf2dd;
+    --obsoleto:#6b7a80;
+    --obsoleto-bg:#e9eef0;
+    --alerta:#c0392b;
+    --alerta-bg:#fbeae8;
+    --shadow:0 1px 3px rgba(20,48,58,.08),0 4px 16px rgba(20,48,58,.06);
+    --radius:14px;
+    --tap:48px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--text);
+    line-height:1.45;-webkit-font-smoothing:antialiased;
+    font-size:16px;
+  }
+  button{font-family:inherit;cursor:pointer}
+  a{color:var(--primary)}
+  .hidden{display:none !important}
+
+  /* ---------- App bar ---------- */
+  .appbar{
+    position:sticky;top:0;z-index:50;
+    background:var(--primary);color:#fff;
+    padding:max(12px,env(safe-area-inset-top)) 16px 12px;
+    box-shadow:var(--shadow);
+  }
+  .appbar-row{display:flex;align-items:center;gap:12px;max-width:1100px;margin:0 auto}
+  .appbar h1{font-size:1.05rem;margin:0;font-weight:650;letter-spacing:.2px;flex:1;line-height:1.2}
+  .appbar h1 small{display:block;font-weight:400;font-size:.72rem;opacity:.85;letter-spacing:.3px}
+  .logo{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.16);
+    display:grid;place-items:center;flex:none}
+  .logo svg{width:20px;height:20px}
+  .user-chip{display:flex;align-items:center;gap:8px;font-size:.8rem}
+  .user-chip .role{background:rgba(255,255,255,.18);padding:3px 9px;border-radius:20px;font-weight:600}
+  .btn-ghost{background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:10px;
+    min-height:38px;padding:0 12px;font-size:.82rem;font-weight:600}
+  .btn-ghost:hover{background:rgba(255,255,255,.26)}
+
+  .wrap{max-width:1100px;margin:0 auto;padding:16px}
+
+  /* ---------- Buttons ---------- */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    min-height:var(--tap);padding:0 20px;border-radius:12px;border:none;
+    font-size:1rem;font-weight:650;background:var(--primary);color:#fff;width:100%}
+  .btn:hover{background:var(--primary-dark)}
+  .btn.secondary{background:var(--surface);color:var(--primary);border:1.5px solid var(--line)}
+  .btn.secondary:hover{background:var(--surface-2)}
+  .btn.danger{background:var(--alerta)}
+  .btn.danger:hover{filter:brightness(.92)}
+  .btn.small{min-height:42px;font-size:.9rem;padding:0 14px;width:auto}
+  .btn svg{width:20px;height:20px;flex:none}
+
+  /* ---------- Login ---------- */
+  .login-screen{min-height:100dvh;display:grid;place-items:center;padding:20px;
+    background:linear-gradient(160deg,#0d5c75,#0a3f50)}
+  .login-card{background:var(--surface);border-radius:18px;box-shadow:var(--shadow);
+    width:100%;max-width:400px;padding:28px 24px}
+  .login-card .brand{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:20px;text-align:center}
+  .login-card .brand .logo{width:54px;height:54px;background:var(--primary-soft)}
+  .login-card .brand .logo svg{width:30px;height:30px;color:var(--primary)}
+  .login-card h2{margin:2px 0 0;font-size:1.25rem;color:var(--primary-dark)}
+  .login-card .sub{color:var(--muted);font-size:.85rem;text-align:center;margin-top:2px}
+  label{display:block;font-size:.82rem;font-weight:600;color:var(--muted);margin:14px 0 6px}
+  input,select,textarea{width:100%;min-height:var(--tap);padding:10px 14px;font-size:1rem;
+    border:1.5px solid var(--line);border-radius:12px;background:var(--surface);color:var(--text)}
+  textarea{min-height:90px;padding-top:12px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);
+    box-shadow:0 0 0 3px var(--primary-soft)}
+  .login-card .btn{margin-top:20px}
+  .login-err{background:var(--alerta-bg);color:var(--alerta);border-radius:10px;
+    padding:10px 12px;font-size:.85rem;margin-top:14px;font-weight:600}
+  .auth-toggle{display:block;width:100%;background:none;border:none;color:var(--primary);
+    font-size:.88rem;margin-top:14px;padding:8px;cursor:pointer}
+  .auth-toggle b{color:var(--primary-dark)}
+  .demo-accounts{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+  .demo-accounts p{font-size:.75rem;color:var(--muted);margin:0 0 8px}
+  .demo-btn{display:flex;justify-content:space-between;align-items:center;width:100%;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:10px;
+    padding:10px 12px;margin-bottom:8px;font-size:.82rem;text-align:left;color:var(--text)}
+  .demo-btn:hover{border-color:var(--primary);background:var(--primary-soft)}
+  .demo-btn b{color:var(--primary-dark)}
+  .disclaimer{font-size:.7rem;color:var(--muted);margin-top:14px;text-align:center;line-height:1.4}
+
+  /* ---------- Search & filters ---------- */
+  .toolbar{position:sticky;top:62px;z-index:40;background:var(--bg);padding-top:4px}
+  .search-box{position:relative;margin-bottom:10px}
+  .search-box svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);
+    width:20px;height:20px;color:var(--muted)}
+  .search-box input{padding-left:44px;background:var(--surface);box-shadow:var(--shadow);border-color:transparent}
+  .search-box .clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);
+    background:none;border:none;color:var(--muted);font-size:1.4rem;width:34px;height:34px;border-radius:8px}
+  .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;-webkit-overflow-scrolling:touch}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);
+    border-radius:22px;padding:8px 14px;font-size:.85rem;font-weight:600;white-space:nowrap;min-height:40px}
+  .chip:hover{border-color:var(--primary)}
+  .chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .chip .count{opacity:.7;font-weight:500;margin-left:4px}
+
+  .meta-row{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    flex-wrap:wrap;margin:2px 0 12px}
+  .result-count{font-size:.82rem;color:var(--muted);font-weight:600}
+
+  /* state filter (gestor) */
+  .state-filter{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .state-filter .seg{display:flex;background:var(--surface);border:1px solid var(--line);
+    border-radius:10px;overflow:hidden}
+  .state-filter .seg button{background:none;border:none;padding:8px 12px;font-size:.78rem;
+    font-weight:600;color:var(--muted);min-height:40px}
+  .state-filter .seg button.active{background:var(--primary-soft);color:var(--primary-dark)}
+
+  /* ---------- Cards ---------- */
+  .cards{display:grid;gap:12px;grid-template-columns:1fr}
+  @media(min-width:640px){.cards{grid-template-columns:1fr 1fr}}
+  @media(min-width:980px){.cards{grid-template-columns:1fr 1fr 1fr}}
+  .card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:16px;border:1px solid transparent;text-align:left;width:100%;
+    display:flex;flex-direction:column;gap:10px;transition:transform .08s,box-shadow .12s}
+  .card:hover{border-color:var(--primary-soft);transform:translateY(-2px);
+    box-shadow:0 6px 22px rgba(20,48,58,.12)}
+  .card.flag-old{border-left:5px solid var(--alerta)}
+  .card .code{font-size:.72rem;font-weight:700;letter-spacing:.4px;color:var(--primary);
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .card h3{margin:0;font-size:1.02rem;line-height:1.25;color:var(--text)}
+  .card .area{font-size:.8rem;color:var(--muted)}
+  .badges{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .badge{font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap}
+  .badge.cat{background:var(--primary-soft);color:var(--primary-dark)}
+  .badge.estado-Vigente{background:var(--vigente-bg);color:var(--vigente)}
+  .badge.estado-EmRevisão,.badge.estado-EmRevisao{background:var(--revisao-bg);color:var(--revisao)}
+  .badge.estado-Obsoleto{background:var(--obsoleto-bg);color:var(--obsoleto)}
+  .badge.old{background:var(--alerta-bg);color:var(--alerta)}
+  .card .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;
+    margin-top:auto;padding-top:8px;border-top:1px solid var(--surface-2);
+    font-size:.76rem;color:var(--muted)}
+  .card .foot .ver{font-weight:600}
+
+  .empty{text-align:center;padding:60px 20px;color:var(--muted)}
+  .empty svg{width:54px;height:54px;opacity:.4;margin-bottom:10px}
+
+  /* gestor alert banner */
+  .alert-banner{background:var(--alerta-bg);border:1px solid #f3c6c0;color:var(--alerta);
+    border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:.85rem;
+    display:flex;gap:10px;align-items:flex-start;font-weight:600}
+  .alert-banner svg{width:20px;height:20px;flex:none;margin-top:1px}
+  .alert-banner button{margin-left:auto;background:none;border:none;color:var(--alerta);
+    text-decoration:underline;font-weight:700;font-size:.82rem}
+
+  /* ---------- Detail ---------- */
+  .back-btn{display:inline-flex;align-items:center;gap:6px;background:none;border:none;
+    color:var(--primary);font-weight:650;font-size:.92rem;padding:8px 0;margin-bottom:6px}
+  .back-btn svg{width:18px;height:18px}
+  .detail{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;max-width:760px;margin:0 auto}
+  .detail .code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;
+    color:var(--primary);font-size:.82rem;letter-spacing:.4px}
+  .detail h2{margin:6px 0 12px;font-size:1.45rem;line-height:1.25}
+  .detail .badges{margin-bottom:16px}
+  .detail .doc-btn{margin:8px 0 4px}
+  .doc-missing{background:var(--revisao-bg);color:var(--revisao);border-radius:10px;
+    padding:10px 12px;font-size:.82rem;font-weight:600;margin-top:8px;display:flex;gap:8px;align-items:center}
+  .doc-missing svg{width:18px;height:18px;flex:none}
+  .file-warn{background:#fff7e6;border:1px solid #f0d28a;color:#8a5a00;border-radius:10px;
+    padding:10px 12px;font-size:.8rem;margin-bottom:12px;display:flex;gap:8px;align-items:flex-start;line-height:1.4}
+  .file-warn svg{width:18px;height:18px;flex:none;margin-top:1px}
+  .file-warn code{background:rgba(0,0,0,.07);padding:1px 5px;border-radius:4px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em}
+  .specs{list-style:none;padding:0;margin:18px 0 0;border-top:1px solid var(--line)}
+  .specs li{display:flex;gap:14px;padding:12px 2px;border-bottom:1px solid var(--surface-2);font-size:.92rem}
+  .specs li .k{flex:none;width:130px;color:var(--muted);font-weight:600;font-size:.82rem}
+  .specs li .v{flex:1}
+  .kw-list{display:flex;gap:6px;flex-wrap:wrap}
+  .kw{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:3px 9px;font-size:.78rem;color:var(--muted)}
+  .detail-old{background:var(--alerta-bg);color:var(--alerta);border:1px solid #f3c6c0;
+    border-radius:10px;padding:10px 12px;font-size:.84rem;font-weight:600;margin-bottom:14px;
+    display:flex;gap:8px;align-items:center}
+  .detail-old svg{width:18px;height:18px;flex:none}
+  /* vista detalhe: separadores Resumo / PDF */
+  .view-tabs{display:flex;gap:6px;background:var(--surface-2);border:1px solid var(--line);
+    border-radius:12px;padding:4px;margin:4px 0 16px}
+  .view-tab{flex:1;border:none;background:none;min-height:42px;border-radius:9px;font-size:.92rem;
+    font-weight:650;color:var(--muted)}
+  .view-tab.active{background:var(--surface);color:var(--primary-dark);box-shadow:var(--shadow)}
+  .resumo-flag{display:flex;gap:8px;align-items:flex-start;background:var(--primary-soft);
+    color:var(--primary-dark);border-radius:10px;padding:10px 12px;font-size:.78rem;line-height:1.45;margin-bottom:6px}
+  .resumo-flag svg{width:18px;height:18px;flex:none;margin-top:1px}
+  .resumo-sec{padding:12px 0;border-bottom:1px solid var(--surface-2)}
+  .resumo-sec:last-child{border-bottom:none}
+  .resumo-sec h4{margin:0 0 6px;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;color:var(--primary)}
+  .resumo-sec p{margin:0;font-size:.95rem;line-height:1.5}
+  .resumo-sec ul{margin:0;padding-left:20px}
+  .resumo-sec li{font-size:.95rem;line-height:1.5;margin:3px 0}
+  .resumo-empty,.pdf-note{display:flex;gap:8px;align-items:flex-start;color:var(--muted);
+    font-size:.84rem;line-height:1.45;padding:14px 4px}
+  .resumo-empty svg,.pdf-note svg{width:18px;height:18px;flex:none;margin-top:1px;color:var(--primary)}
+  .resumo-box .doc-btn,.pdf-note{margin-top:8px}
+  .gestor-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px;
+    border-top:1px solid var(--line);padding-top:18px}
+  @media(min-width:520px){.gestor-actions{grid-template-columns:repeat(3,1fr)}}
+
+  /* ---------- Form ---------- */
+  .form-card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:20px;max-width:760px;margin:0 auto}
+  .form-card h2{margin:0 0 4px;font-size:1.3rem}
+  .form-card .hint{color:var(--muted);font-size:.82rem;margin:0 0 8px}
+  .grid2{display:grid;gap:0 16px}
+  @media(min-width:560px){.grid2{grid-template-columns:1fr 1fr}}
+  .form-actions{display:flex;gap:10px;margin-top:22px}
+  .form-actions .btn{flex:1}
+  .form-sep{margin:22px 0 4px;padding-top:14px;border-top:1px solid var(--line);
+    font-weight:700;color:var(--primary-dark);font-size:1rem}
+  .form-sep span{display:block;font-weight:400;font-size:.78rem;color:var(--muted);margin-top:2px}
+
+  /* ---------- Gestão de contas ---------- */
+  .user-row{display:flex;flex-direction:column;gap:10px;background:var(--surface);
+    border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+  .user-head{display:flex;align-items:center;gap:12px}
+  .user-row .info{flex:1;min-width:0}
+  .user-row .info b{display:block;font-size:.96rem}
+  .user-row .info small{color:var(--muted);font-size:.8rem;word-break:break-all}
+  .role-badge{font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap}
+  .role-gestor{background:var(--primary-soft);color:var(--primary-dark)}
+  .role-enfermeiro{background:var(--surface-2);color:var(--muted)}
+  .user-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .user-actions .btn{width:auto;min-height:38px;font-size:.8rem;padding:0 12px}
+  .you-tag{font-size:.68rem;background:var(--accent);color:#fff;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+  .audit-note{background:var(--surface-2);border-radius:10px;padding:10px 12px;
+    font-size:.78rem;color:var(--muted);margin-top:16px;display:flex;gap:8px;align-items:flex-start}
+  .audit-note svg{width:16px;height:16px;flex:none;margin-top:1px;color:var(--primary)}
+
+  /* ---------- Toast ---------- */
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(120px);
+    background:var(--text);color:#fff;padding:12px 18px;border-radius:12px;font-size:.88rem;
+    font-weight:600;box-shadow:var(--shadow);z-index:200;transition:transform .25s;max-width:90vw}
+  #toast.show{transform:translateX(-50%) translateY(0)}
+
+  /* ---------- Modal ---------- */
+  .modal-back{position:fixed;inset:0;background:rgba(20,48,58,.5);z-index:150;
+    display:grid;place-items:center;padding:20px}
+  .modal{background:var(--surface);border-radius:16px;padding:22px;max-width:380px;width:100%;box-shadow:var(--shadow)}
+  .modal h3{margin:0 0 8px;font-size:1.15rem}
+  .modal p{margin:0 0 18px;color:var(--muted);font-size:.9rem}
+  .modal .row{display:flex;gap:10px}
+  .modal .row .btn{flex:1}
+  .qr-modal{max-width:340px;text-align:center}
+  .qr-modal h3{text-align:center}
+  .qr-modal img{width:236px;height:236px;image-rendering:pixelated;border:10px solid #fff;
+    border-radius:10px;background:#fff;box-shadow:0 0 0 1px var(--line);margin:4px auto 0}
+  .qr-url{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.8rem;word-break:break-all;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:14px 0 10px}
+  .qr-hint{font-size:.76rem;color:var(--muted);text-align:left;line-height:1.5;margin:10px 0 0;
+    background:var(--surface-2);border-radius:8px;padding:10px 12px}
+  .qr-hint code{background:rgba(0,0,0,.07);padding:1px 5px;border-radius:4px;font-size:.92em}
+  .qr-hint.warn{background:var(--revisao-bg);color:var(--revisao)}
+
+  /* ---------- Logótipo (logo.png com fallback para o ícone SVG) ---------- */
+  .brand-img{display:none}
+  .appbar-logo{width:38px;height:38px;border-radius:9px;object-fit:cover;flex:none}
+  .login-logo{width:64px;height:64px;border-radius:14px;object-fit:cover;margin:0 auto;
+    box-shadow:0 4px 14px rgba(0,0,0,.18)}
+  body.has-logo .logo-fallback{display:none}
+  body.has-logo img.appbar-logo{display:block}
+  body.has-logo img.login-logo{display:block}
+
+  footer.app-foot{text-align:center;color:var(--muted);font-size:.72rem;padding:24px 16px 32px;line-height:1.5}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginView" class="login-screen">
+  <form class="login-card" id="loginForm" autocomplete="off">
+    <div class="brand">
+      <img class="brand-img login-logo" src="logo.jpg?v=3" alt="SU Connect">
+      <div class="logo logo-fallback">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M12 8v6M9 11h6"/></svg>
+      </div>
+      <h2>SU Connect</h2>
+      <div class="sub">Serviço de Urgência · Consulta de procedimentos clínicos</div>
+    </div>
+    <div id="nomeField" class="hidden">
+      <label for="nome">Nome</label>
+      <input type="text" id="nome" placeholder="O seu nome" autocomplete="name">
+    </div>
+    <label for="email">Email</label>
+    <input type="email" id="email" placeholder="nome@su.pt" autocomplete="username" required>
+    <label for="pass">Palavra-passe</label>
+    <input type="password" id="pass" placeholder="••••••••" autocomplete="current-password" required>
+    <div id="loginErr" class="login-err hidden"></div>
+    <button class="btn" type="submit" id="loginSubmit">Entrar</button>
+    <button type="button" id="authToggle" class="auth-toggle hidden">Primeira vez? <b>Criar conta</b></button>
+
+    <div class="demo-accounts">
+      <p>Contas de demonstração (toque para preencher):</p>
+      <button type="button" class="demo-btn" data-email="enfermeiro@su.pt" data-pass="enfermeiro">
+        <span><b>Enfermeiro</b><br>consulta apenas</span><span>enfermeiro@su.pt</span>
+      </button>
+      <button type="button" class="demo-btn" data-email="gestor@su.pt" data-pass="gestor">
+        <span><b>Gestor</b><br>administração completa</span><span>gestor@su.pt</span>
+      </button>
+    </div>
+    <div class="disclaimer">⚠️ Interface de consulta — <b>não</b> é a fonte normativa oficial.
+      Autenticação de demonstração, sem segurança real. Os documentos vigentes residem no sistema institucional (DiOr).</div>
+  </form>
+</div>
+
+<!-- APP -->
+<div id="appView" class="hidden">
+  <header class="appbar">
+    <div class="appbar-row">
+      <img class="brand-img appbar-logo" src="logo.jpg?v=3" alt="SU Connect">
+      <div class="logo logo-fallback">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M12 8v6M9 11h6"/></svg>
+      </div>
+      <h1>SU Connect<small>Serviço de Urgência</small></h1>
+      <div class="user-chip">
+        <span class="role" id="userRole"></span>
+        <button class="btn-ghost hidden" id="installBtn" title="Instalar a app">Instalar</button>
+        <button class="btn-ghost" id="shareBtn" title="Partilhar app (QR)" aria-label="Partilhar app">Partilhar</button>
+        <button class="btn-ghost" id="logoutBtn">Sair</button>
+      </div>
+    </div>
+  </header>
+  <main id="mainContent" class="wrap"></main>
+  <footer class="app-foot">
+    Interface de consulta rápida · não substitui o sistema documental oficial (DiOr).<br>
+    <span id="footMeta"></span>
+  </footer>
+</div>
+
+<div id="toast"></div>
+<div id="modalRoot"></div>
+<!-- Configuração da nuvem + biblioteca Supabase (locais, para funcionar offline) -->
+<script src="config.js"></script>
+<script src="supabase.js"></script>
+<!-- QR Code Generator (c) Kazuhiko Arase — MIT -->
+<script>
+//---------------------------------------------------------------------
+//
+// QR Code Generator for JavaScript
+//
+// Copyright (c) 2009 Kazuhiko Arase
+//
+// URL: http://www.d-project.com/
+//
+// Licensed under the MIT license:
+//  http://www.opensource.org/licenses/mit-license.php
+//
+// The word 'QR Code' is registered trademark of
+// DENSO WAVE INCORPORATED
+//  http://www.denso-wave.com/qrcode/faqpatent-e.html
+//
+//---------------------------------------------------------------------
+
+var qrcode = function() {
+
+  //---------------------------------------------------------------------
+  // qrcode
+  //---------------------------------------------------------------------
+
+  /**
+   * qrcode
+   * @param typeNumber 1 to 40
+   * @param errorCorrectionLevel 'L','M','Q','H'
+   */
+  var qrcode = function(typeNumber, errorCorrectionLevel) {
+
+    var PAD0 = 0xEC;
+    var PAD1 = 0x11;
+
+    var _typeNumber = typeNumber;
+    var _errorCorrectionLevel = QRErrorCorrectionLevel[errorCorrectionLevel];
+    var _modules = null;
+    var _moduleCount = 0;
+    var _dataCache = null;
+    var _dataList = [];
+
+    var _this = {};
+
+    var makeImpl = function(test, maskPattern) {
+
+      _moduleCount = _typeNumber * 4 + 17;
+      _modules = function(moduleCount) {
+        var modules = new Array(moduleCount);
+        for (var row = 0; row < moduleCount; row += 1) {
+          modules[row] = new Array(moduleCount);
+          for (var col = 0; col < moduleCount; col += 1) {
+            modules[row][col] = null;
+          }
+        }
+        return modules;
+      }(_moduleCount);
+
+      setupPositionProbePattern(0, 0);
+      setupPositionProbePattern(_moduleCount - 7, 0);
+      setupPositionProbePattern(0, _moduleCount - 7);
+      setupPositionAdjustPattern();
+      setupTimingPattern();
+      setupTypeInfo(test, maskPattern);
+
+      if (_typeNumber >= 7) {
+        setupTypeNumber(test);
+      }
+
+      if (_dataCache == null) {
+        _dataCache = createData(_typeNumber, _errorCorrectionLevel, _dataList);
+      }
+
+      mapData(_dataCache, maskPattern);
+    };
+
+    var setupPositionProbePattern = function(row, col) {
+
+      for (var r = -1; r <= 7; r += 1) {
+
+        if (row + r <= -1 || _moduleCount <= row + r) continue;
+
+        for (var c = -1; c <= 7; c += 1) {
+
+          if (col + c <= -1 || _moduleCount <= col + c) continue;
+
+          if ( (0 <= r && r <= 6 && (c == 0 || c == 6) )
+              || (0 <= c && c <= 6 && (r == 0 || r == 6) )
+              || (2 <= r && r <= 4 && 2 <= c && c <= 4) ) {
+            _modules[row + r][col + c] = true;
+          } else {
+            _modules[row + r][col + c] = false;
+          }
+        }
+      }
+    };
+
+    var getBestMaskPattern = function() {
+
+      var minLostPoint = 0;
+      var pattern = 0;
+
+      for (var i = 0; i < 8; i += 1) {
+
+        makeImpl(true, i);
+
+        var lostPoint = QRUtil.getLostPoint(_this);
+
+        if (i == 0 || minLostPoint > lostPoint) {
+          minLostPoint = lostPoint;
+          pattern = i;
+        }
+      }
+
+      return pattern;
+    };
+
+    var setupTimingPattern = function() {
+
+      for (var r = 8; r < _moduleCount - 8; r += 1) {
+        if (_modules[r][6] != null) {
+          continue;
+        }
+        _modules[r][6] = (r % 2 == 0);
+      }
+
+      for (var c = 8; c < _moduleCount - 8; c += 1) {
+        if (_modules[6][c] != null) {
+          continue;
+        }
+        _modules[6][c] = (c % 2 == 0);
+      }
+    };
+
+    var setupPositionAdjustPattern = function() {
+
+      var pos = QRUtil.getPatternPosition(_typeNumber);
+
+      for (var i = 0; i < pos.length; i += 1) {
+
+        for (var j = 0; j < pos.length; j += 1) {
+
+          var row = pos[i];
+          var col = pos[j];
+
+          if (_modules[row][col] != null) {
+            continue;
+          }
+
+          for (var r = -2; r <= 2; r += 1) {
+
+            for (var c = -2; c <= 2; c += 1) {
+
+              if (r == -2 || r == 2 || c == -2 || c == 2
+                  || (r == 0 && c == 0) ) {
+                _modules[row + r][col + c] = true;
+              } else {
+                _modules[row + r][col + c] = false;
+              }
+            }
+          }
+        }
+      }
+    };
+
+    var setupTypeNumber = function(test) {
+
+      var bits = QRUtil.getBCHTypeNumber(_typeNumber);
+
+      for (var i = 0; i < 18; i += 1) {
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+        _modules[Math.floor(i / 3)][i % 3 + _moduleCount - 8 - 3] = mod;
+      }
+
+      for (var i = 0; i < 18; i += 1) {
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+        _modules[i % 3 + _moduleCount - 8 - 3][Math.floor(i / 3)] = mod;
+      }
+    };
+
+    var setupTypeInfo = function(test, maskPattern) {
+
+      var data = (_errorCorrectionLevel << 3) | maskPattern;
+      var bits = QRUtil.getBCHTypeInfo(data);
+
+      // vertical
+      for (var i = 0; i < 15; i += 1) {
+
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+
+        if (i < 6) {
+          _modules[i][8] = mod;
+        } else if (i < 8) {
+          _modules[i + 1][8] = mod;
+        } else {
+          _modules[_moduleCount - 15 + i][8] = mod;
+        }
+      }
+
+      // horizontal
+      for (var i = 0; i < 15; i += 1) {
+
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+
+        if (i < 8) {
+          _modules[8][_moduleCount - i - 1] = mod;
+        } else if (i < 9) {
+          _modules[8][15 - i - 1 + 1] = mod;
+        } else {
+          _modules[8][15 - i - 1] = mod;
+        }
+      }
+
+      // fixed module
+      _modules[_moduleCount - 8][8] = (!test);
+    };
+
+    var mapData = function(data, maskPattern) {
+
+      var inc = -1;
+      var row = _moduleCount - 1;
+      var bitIndex = 7;
+      var byteIndex = 0;
+      var maskFunc = QRUtil.getMaskFunction(maskPattern);
+
+      for (var col = _moduleCount - 1; col > 0; col -= 2) {
+
+        if (col == 6) col -= 1;
+
+        while (true) {
+
+          for (var c = 0; c < 2; c += 1) {
+
+            if (_modules[row][col - c] == null) {
+
+              var dark = false;
+
+              if (byteIndex < data.length) {
+                dark = ( ( (data[byteIndex] >>> bitIndex) & 1) == 1);
+              }
+
+              var mask = maskFunc(row, col - c);
+
+              if (mask) {
+                dark = !dark;
+              }
+
+              _modules[row][col - c] = dark;
+              bitIndex -= 1;
+
+              if (bitIndex == -1) {
+                byteIndex += 1;
+                bitIndex = 7;
+              }
+            }
+          }
+
+          row += inc;
+
+          if (row < 0 || _moduleCount <= row) {
+            row -= inc;
+            inc = -inc;
+            break;
+          }
+        }
+      }
+    };
+
+    var createBytes = function(buffer, rsBlocks) {
+
+      var offset = 0;
+
+      var maxDcCount = 0;
+      var maxEcCount = 0;
+
+      var dcdata = new Array(rsBlocks.length);
+      var ecdata = new Array(rsBlocks.length);
+
+      for (var r = 0; r < rsBlocks.length; r += 1) {
+
+        var dcCount = rsBlocks[r].dataCount;
+        var ecCount = rsBlocks[r].totalCount - dcCount;
+
+        maxDcCount = Math.max(maxDcCount, dcCount);
+        maxEcCount = Math.max(maxEcCount, ecCount);
+
+        dcdata[r] = new Array(dcCount);
+
+        for (var i = 0; i < dcdata[r].length; i += 1) {
+          dcdata[r][i] = 0xff & buffer.getBuffer()[i + offset];
+        }
+        offset += dcCount;
+
+        var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount);
+        var rawPoly = qrPolynomial(dcdata[r], rsPoly.getLength() - 1);
+
+        var modPoly = rawPoly.mod(rsPoly);
+        ecdata[r] = new Array(rsPoly.getLength() - 1);
+        for (var i = 0; i < ecdata[r].length; i += 1) {
+          var modIndex = i + modPoly.getLength() - ecdata[r].length;
+          ecdata[r][i] = (modIndex >= 0)? modPoly.getAt(modIndex) : 0;
+        }
+      }
+
+      var totalCodeCount = 0;
+      for (var i = 0; i < rsBlocks.length; i += 1) {
+        totalCodeCount += rsBlocks[i].totalCount;
+      }
+
+      var data = new Array(totalCodeCount);
+      var index = 0;
+
+      for (var i = 0; i < maxDcCount; i += 1) {
+        for (var r = 0; r < rsBlocks.length; r += 1) {
+          if (i < dcdata[r].length) {
+            data[index] = dcdata[r][i];
+            index += 1;
+          }
+        }
+      }
+
+      for (var i = 0; i < maxEcCount; i += 1) {
+        for (var r = 0; r < rsBlocks.length; r += 1) {
+          if (i < ecdata[r].length) {
+            data[index] = ecdata[r][i];
+            index += 1;
+          }
+        }
+      }
+
+      return data;
+    };
+
+    var createData = function(typeNumber, errorCorrectionLevel, dataList) {
+
+      var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectionLevel);
+
+      var buffer = qrBitBuffer();
+
+      for (var i = 0; i < dataList.length; i += 1) {
+        var data = dataList[i];
+        buffer.put(data.getMode(), 4);
+        buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber) );
+        data.write(buffer);
+      }
+
+      // calc num max data.
+      var totalDataCount = 0;
+      for (var i = 0; i < rsBlocks.length; i += 1) {
+        totalDataCount += rsBlocks[i].dataCount;
+      }
+
+      if (buffer.getLengthInBits() > totalDataCount * 8) {
+        throw 'code length overflow. ('
+          + buffer.getLengthInBits()
+          + '>'
+          + totalDataCount * 8
+          + ')';
+      }
+
+      // end code
+      if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) {
+        buffer.put(0, 4);
+      }
+
+      // padding
+      while (buffer.getLengthInBits() % 8 != 0) {
+        buffer.putBit(false);
+      }
+
+      // padding
+      while (true) {
+
+        if (buffer.getLengthInBits() >= totalDataCount * 8) {
+          break;
+        }
+        buffer.put(PAD0, 8);
+
+        if (buffer.getLengthInBits() >= totalDataCount * 8) {
+          break;
+        }
+        buffer.put(PAD1, 8);
+      }
+
+      return createBytes(buffer, rsBlocks);
+    };
+
+    _this.addData = function(data, mode) {
+
+      mode = mode || 'Byte';
+
+      var newData = null;
+
+      switch(mode) {
+      case 'Numeric' :
+        newData = qrNumber(data);
+        break;
+      case 'Alphanumeric' :
+        newData = qrAlphaNum(data);
+        break;
+      case 'Byte' :
+        newData = qr8BitByte(data);
+        break;
+      case 'Kanji' :
+        newData = qrKanji(data);
+        break;
+      default :
+        throw 'mode:' + mode;
+      }
+
+      _dataList.push(newData);
+      _dataCache = null;
+    };
+
+    _this.isDark = function(row, col) {
+      if (row < 0 || _moduleCount <= row || col < 0 || _moduleCount <= col) {
+        throw row + ',' + col;
+      }
+      return _modules[row][col];
+    };
+
+    _this.getModuleCount = function() {
+      return _moduleCount;
+    };
+
+    _this.make = function() {
+      if (_typeNumber < 1) {
+        var typeNumber = 1;
+
+        for (; typeNumber < 40; typeNumber++) {
+          var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, _errorCorrectionLevel);
+          var buffer = qrBitBuffer();
+
+          for (var i = 0; i < _dataList.length; i++) {
+            var data = _dataList[i];
+            buffer.put(data.getMode(), 4);
+            buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber) );
+            data.write(buffer);
+          }
+
+          var totalDataCount = 0;
+          for (var i = 0; i < rsBlocks.length; i++) {
+            totalDataCount += rsBlocks[i].dataCount;
+          }
+
+          if (buffer.getLengthInBits() <= totalDataCount * 8) {
+            break;
+          }
+        }
+
+        _typeNumber = typeNumber;
+      }
+
+      makeImpl(false, getBestMaskPattern() );
+    };
+
+    _this.createTableTag = function(cellSize, margin) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var qrHtml = '';
+
+      qrHtml += '<table style="';
+      qrHtml += ' border-width: 0px; border-style: none;';
+      qrHtml += ' border-collapse: collapse;';
+      qrHtml += ' padding: 0px; margin: ' + margin + 'px;';
+      qrHtml += '">';
+      qrHtml += '<tbody>';
+
+      for (var r = 0; r < _this.getModuleCount(); r += 1) {
+
+        qrHtml += '<tr>';
+
+        for (var c = 0; c < _this.getModuleCount(); c += 1) {
+          qrHtml += '<td style="';
+          qrHtml += ' border-width: 0px; border-style: none;';
+          qrHtml += ' border-collapse: collapse;';
+          qrHtml += ' padding: 0px; margin: 0px;';
+          qrHtml += ' width: ' + cellSize + 'px;';
+          qrHtml += ' height: ' + cellSize + 'px;';
+          qrHtml += ' background-color: ';
+          qrHtml += _this.isDark(r, c)? '#000000' : '#ffffff';
+          qrHtml += ';';
+          qrHtml += '"/>';
+        }
+
+        qrHtml += '</tr>';
+      }
+
+      qrHtml += '</tbody>';
+      qrHtml += '</table>';
+
+      return qrHtml;
+    };
+
+    _this.createSvgTag = function(cellSize, margin, alt, title) {
+
+      var opts = {};
+      if (typeof arguments[0] == 'object') {
+        // Called by options.
+        opts = arguments[0];
+        // overwrite cellSize and margin.
+        cellSize = opts.cellSize;
+        margin = opts.margin;
+        alt = opts.alt;
+        title = opts.title;
+      }
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      // Compose alt property surrogate
+      alt = (typeof alt === 'string') ? {text: alt} : alt || {};
+      alt.text = alt.text || null;
+      alt.id = (alt.text) ? alt.id || 'qrcode-description' : null;
+
+      // Compose title property surrogate
+      title = (typeof title === 'string') ? {text: title} : title || {};
+      title.text = title.text || null;
+      title.id = (title.text) ? title.id || 'qrcode-title' : null;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var c, mc, r, mr, qrSvg='', rect;
+
+      rect = 'l' + cellSize + ',0 0,' + cellSize +
+        ' -' + cellSize + ',0 0,-' + cellSize + 'z ';
+
+      qrSvg += '<svg version="1.1" xmlns="http://www.w3.org/2000/svg"';
+      qrSvg += !opts.scalable ? ' width="' + size + 'px" height="' + size + 'px"' : '';
+      qrSvg += ' viewBox="0 0 ' + size + ' ' + size + '" ';
+      qrSvg += ' preserveAspectRatio="xMinYMin meet"';
+      qrSvg += (title.text || alt.text) ? ' role="img" aria-labelledby="' +
+          escapeXml([title.id, alt.id].join(' ').trim() ) + '"' : '';
+      qrSvg += '>';
+      qrSvg += (title.text) ? '<title id="' + escapeXml(title.id) + '">' +
+          escapeXml(title.text) + '</title>' : '';
+      qrSvg += (alt.text) ? '<description id="' + escapeXml(alt.id) + '">' +
+          escapeXml(alt.text) + '</description>' : '';
+      qrSvg += '<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>';
+      qrSvg += '<path d="';
+
+      for (r = 0; r < _this.getModuleCount(); r += 1) {
+        mr = r * cellSize + margin;
+        for (c = 0; c < _this.getModuleCount(); c += 1) {
+          if (_this.isDark(r, c) ) {
+            mc = c*cellSize+margin;
+            qrSvg += 'M' + mc + ',' + mr + rect;
+          }
+        }
+      }
+
+      qrSvg += '" stroke="transparent" fill="black"/>';
+      qrSvg += '</svg>';
+
+      return qrSvg;
+    };
+
+    _this.createDataURL = function(cellSize, margin) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      return createDataURL(size, size, function(x, y) {
+        if (min <= x && x < max && min <= y && y < max) {
+          var c = Math.floor( (x - min) / cellSize);
+          var r = Math.floor( (y - min) / cellSize);
+          return _this.isDark(r, c)? 0 : 1;
+        } else {
+          return 1;
+        }
+      } );
+    };
+
+    _this.createImgTag = function(cellSize, margin, alt) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+
+      var img = '';
+      img += '<img';
+      img += '\u0020src="';
+      img += _this.createDataURL(cellSize, margin);
+      img += '"';
+      img += '\u0020width="';
+      img += size;
+      img += '"';
+      img += '\u0020height="';
+      img += size;
+      img += '"';
+      if (alt) {
+        img += '\u0020alt="';
+        img += escapeXml(alt);
+        img += '"';
+      }
+      img += '/>';
+
+      return img;
+    };
+
+    var escapeXml = function(s) {
+      var escaped = '';
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charAt(i);
+        switch(c) {
+        case '<': escaped += '&lt;'; break;
+        case '>': escaped += '&gt;'; break;
+        case '&': escaped += '&amp;'; break;
+        case '"': escaped += '&quot;'; break;
+        default : escaped += c; break;
+        }
+      }
+      return escaped;
+    };
+
+    var _createHalfASCII = function(margin) {
+      var cellSize = 1;
+      margin = (typeof margin == 'undefined')? cellSize * 2 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      var y, x, r1, r2, p;
+
+      var blocks = {
+        '██': '█',
+        '█ ': '▀',
+        ' █': '▄',
+        '  ': ' '
+      };
+
+      var blocksLastLineNoMargin = {
+        '██': '▀',
+        '█ ': '▀',
+        ' █': ' ',
+        '  ': ' '
+      };
+
+      var ascii = '';
+      for (y = 0; y < size; y += 2) {
+        r1 = Math.floor((y - min) / cellSize);
+        r2 = Math.floor((y + 1 - min) / cellSize);
+        for (x = 0; x < size; x += 1) {
+          p = '█';
+
+          if (min <= x && x < max && min <= y && y < max && _this.isDark(r1, Math.floor((x - min) / cellSize))) {
+            p = ' ';
+          }
+
+          if (min <= x && x < max && min <= y+1 && y+1 < max && _this.isDark(r2, Math.floor((x - min) / cellSize))) {
+            p += ' ';
+          }
+          else {
+            p += '█';
+          }
+
+          // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
+          ascii += (margin < 1 && y+1 >= max) ? blocksLastLineNoMargin[p] : blocks[p];
+        }
+
+        ascii += '\n';
+      }
+
+      if (size % 2 && margin > 0) {
+        return ascii.substring(0, ascii.length - size - 1) + Array(size+1).join('▀');
+      }
+
+      return ascii.substring(0, ascii.length-1);
+    };
+
+    _this.createASCII = function(cellSize, margin) {
+      cellSize = cellSize || 1;
+
+      if (cellSize < 2) {
+        return _createHalfASCII(margin);
+      }
+
+      cellSize -= 1;
+      margin = (typeof margin == 'undefined')? cellSize * 2 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      var y, x, r, p;
+
+      var white = Array(cellSize+1).join('██');
+      var black = Array(cellSize+1).join('  ');
+
+      var ascii = '';
+      var line = '';
+      for (y = 0; y < size; y += 1) {
+        r = Math.floor( (y - min) / cellSize);
+        line = '';
+        for (x = 0; x < size; x += 1) {
+          p = 1;
+
+          if (min <= x && x < max && min <= y && y < max && _this.isDark(r, Math.floor((x - min) / cellSize))) {
+            p = 0;
+          }
+
+          // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
+          line += p ? white : black;
+        }
+
+        for (r = 0; r < cellSize; r += 1) {
+          ascii += line + '\n';
+        }
+      }
+
+      return ascii.substring(0, ascii.length-1);
+    };
+
+    _this.renderTo2dContext = function(context, cellSize) {
+      cellSize = cellSize || 2;
+      var length = _this.getModuleCount();
+      for (var row = 0; row < length; row++) {
+        for (var col = 0; col < length; col++) {
+          context.fillStyle = _this.isDark(row, col) ? 'black' : 'white';
+          context.fillRect(row * cellSize, col * cellSize, cellSize, cellSize);
+        }
+      }
+    }
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrcode.stringToBytes
+  //---------------------------------------------------------------------
+
+  qrcode.stringToBytesFuncs = {
+    'default' : function(s) {
+      var bytes = [];
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charCodeAt(i);
+        bytes.push(c & 0xff);
+      }
+      return bytes;
+    }
+  };
+
+  qrcode.stringToBytes = qrcode.stringToBytesFuncs['default'];
+
+  //---------------------------------------------------------------------
+  // qrcode.createStringToBytes
+  //---------------------------------------------------------------------
+
+  /**
+   * @param unicodeData base64 string of byte array.
+   * [16bit Unicode],[16bit Bytes], ...
+   * @param numChars
+   */
+  qrcode.createStringToBytes = function(unicodeData, numChars) {
+
+    // create conversion map.
+
+    var unicodeMap = function() {
+
+      var bin = base64DecodeInputStream(unicodeData);
+      var read = function() {
+        var b = bin.read();
+        if (b == -1) throw 'eof';
+        return b;
+      };
+
+      var count = 0;
+      var unicodeMap = {};
+      while (true) {
+        var b0 = bin.read();
+        if (b0 == -1) break;
+        var b1 = read();
+        var b2 = read();
+        var b3 = read();
+        var k = String.fromCharCode( (b0 << 8) | b1);
+        var v = (b2 << 8) | b3;
+        unicodeMap[k] = v;
+        count += 1;
+      }
+      if (count != numChars) {
+        throw count + ' != ' + numChars;
+      }
+
+      return unicodeMap;
+    }();
+
+    var unknownChar = '?'.charCodeAt(0);
+
+    return function(s) {
+      var bytes = [];
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charCodeAt(i);
+        if (c < 128) {
+          bytes.push(c);
+        } else {
+          var b = unicodeMap[s.charAt(i)];
+          if (typeof b == 'number') {
+            if ( (b & 0xff) == b) {
+              // 1byte
+              bytes.push(b);
+            } else {
+              // 2bytes
+              bytes.push(b >>> 8);
+              bytes.push(b & 0xff);
+            }
+          } else {
+            bytes.push(unknownChar);
+          }
+        }
+      }
+      return bytes;
+    };
+  };
+
+  //---------------------------------------------------------------------
+  // QRMode
+  //---------------------------------------------------------------------
+
+  var QRMode = {
+    MODE_NUMBER :    1 << 0,
+    MODE_ALPHA_NUM : 1 << 1,
+    MODE_8BIT_BYTE : 1 << 2,
+    MODE_KANJI :     1 << 3
+  };
+
+  //---------------------------------------------------------------------
+  // QRErrorCorrectionLevel
+  //---------------------------------------------------------------------
+
+  var QRErrorCorrectionLevel = {
+    L : 1,
+    M : 0,
+    Q : 3,
+    H : 2
+  };
+
+  //---------------------------------------------------------------------
+  // QRMaskPattern
+  //---------------------------------------------------------------------
+
+  var QRMaskPattern = {
+    PATTERN000 : 0,
+    PATTERN001 : 1,
+    PATTERN010 : 2,
+    PATTERN011 : 3,
+    PATTERN100 : 4,
+    PATTERN101 : 5,
+    PATTERN110 : 6,
+    PATTERN111 : 7
+  };
+
+  //---------------------------------------------------------------------
+  // QRUtil
+  //---------------------------------------------------------------------
+
+  var QRUtil = function() {
+
+    var PATTERN_POSITION_TABLE = [
+      [],
+      [6, 18],
+      [6, 22],
+      [6, 26],
+      [6, 30],
+      [6, 34],
+      [6, 22, 38],
+      [6, 24, 42],
+      [6, 26, 46],
+      [6, 28, 50],
+      [6, 30, 54],
+      [6, 32, 58],
+      [6, 34, 62],
+      [6, 26, 46, 66],
+      [6, 26, 48, 70],
+      [6, 26, 50, 74],
+      [6, 30, 54, 78],
+      [6, 30, 56, 82],
+      [6, 30, 58, 86],
+      [6, 34, 62, 90],
+      [6, 28, 50, 72, 94],
+      [6, 26, 50, 74, 98],
+      [6, 30, 54, 78, 102],
+      [6, 28, 54, 80, 106],
+      [6, 32, 58, 84, 110],
+      [6, 30, 58, 86, 114],
+      [6, 34, 62, 90, 118],
+      [6, 26, 50, 74, 98, 122],
+      [6, 30, 54, 78, 102, 126],
+      [6, 26, 52, 78, 104, 130],
+      [6, 30, 56, 82, 108, 134],
+      [6, 34, 60, 86, 112, 138],
+      [6, 30, 58, 86, 114, 142],
+      [6, 34, 62, 90, 118, 146],
+      [6, 30, 54, 78, 102, 126, 150],
+      [6, 24, 50, 76, 102, 128, 154],
+      [6, 28, 54, 80, 106, 132, 158],
+      [6, 32, 58, 84, 110, 136, 162],
+      [6, 26, 54, 82, 110, 138, 166],
+      [6, 30, 58, 86, 114, 142, 170]
+    ];
+    var G15 = (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0);
+    var G18 = (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0);
+    var G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1);
+
+    var _this = {};
+
+    var getBCHDigit = function(data) {
+      var digit = 0;
+      while (data != 0) {
+        digit += 1;
+        data >>>= 1;
+      }
+      return digit;
+    };
+
+    _this.getBCHTypeInfo = function(data) {
+      var d = data << 10;
+      while (getBCHDigit(d) - getBCHDigit(G15) >= 0) {
+        d ^= (G15 << (getBCHDigit(d) - getBCHDigit(G15) ) );
+      }
+      return ( (data << 10) | d) ^ G15_MASK;
+    };
+
+    _this.getBCHTypeNumber = function(data) {
+      var d = data << 12;
+      while (getBCHDigit(d) - getBCHDigit(G18) >= 0) {
+        d ^= (G18 << (getBCHDigit(d) - getBCHDigit(G18) ) );
+      }
+      return (data << 12) | d;
+    };
+
+    _this.getPatternPosition = function(typeNumber) {
+      return PATTERN_POSITION_TABLE[typeNumber - 1];
+    };
+
+    _this.getMaskFunction = function(maskPattern) {
+
+      switch (maskPattern) {
+
+      case QRMaskPattern.PATTERN000 :
+        return function(i, j) { return (i + j) % 2 == 0; };
+      case QRMaskPattern.PATTERN001 :
+        return function(i, j) { return i % 2 == 0; };
+      case QRMaskPattern.PATTERN010 :
+        return function(i, j) { return j % 3 == 0; };
+      case QRMaskPattern.PATTERN011 :
+        return function(i, j) { return (i + j) % 3 == 0; };
+      case QRMaskPattern.PATTERN100 :
+        return function(i, j) { return (Math.floor(i / 2) + Math.floor(j / 3) ) % 2 == 0; };
+      case QRMaskPattern.PATTERN101 :
+        return function(i, j) { return (i * j) % 2 + (i * j) % 3 == 0; };
+      case QRMaskPattern.PATTERN110 :
+        return function(i, j) { return ( (i * j) % 2 + (i * j) % 3) % 2 == 0; };
+      case QRMaskPattern.PATTERN111 :
+        return function(i, j) { return ( (i * j) % 3 + (i + j) % 2) % 2 == 0; };
+
+      default :
+        throw 'bad maskPattern:' + maskPattern;
+      }
+    };
+
+    _this.getErrorCorrectPolynomial = function(errorCorrectLength) {
+      var a = qrPolynomial([1], 0);
+      for (var i = 0; i < errorCorrectLength; i += 1) {
+        a = a.multiply(qrPolynomial([1, QRMath.gexp(i)], 0) );
+      }
+      return a;
+    };
+
+    _this.getLengthInBits = function(mode, type) {
+
+      if (1 <= type && type < 10) {
+
+        // 1 - 9
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 10;
+        case QRMode.MODE_ALPHA_NUM : return 9;
+        case QRMode.MODE_8BIT_BYTE : return 8;
+        case QRMode.MODE_KANJI     : return 8;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else if (type < 27) {
+
+        // 10 - 26
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 12;
+        case QRMode.MODE_ALPHA_NUM : return 11;
+        case QRMode.MODE_8BIT_BYTE : return 16;
+        case QRMode.MODE_KANJI     : return 10;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else if (type < 41) {
+
+        // 27 - 40
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 14;
+        case QRMode.MODE_ALPHA_NUM : return 13;
+        case QRMode.MODE_8BIT_BYTE : return 16;
+        case QRMode.MODE_KANJI     : return 12;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else {
+        throw 'type:' + type;
+      }
+    };
+
+    _this.getLostPoint = function(qrcode) {
+
+      var moduleCount = qrcode.getModuleCount();
+
+      var lostPoint = 0;
+
+      // LEVEL1
+
+      for (var row = 0; row < moduleCount; row += 1) {
+        for (var col = 0; col < moduleCount; col += 1) {
+
+          var sameCount = 0;
+          var dark = qrcode.isDark(row, col);
+
+          for (var r = -1; r <= 1; r += 1) {
+
+            if (row + r < 0 || moduleCount <= row + r) {
+              continue;
+            }
+
+            for (var c = -1; c <= 1; c += 1) {
+
+              if (col + c < 0 || moduleCount <= col + c) {
+                continue;
+              }
+
+              if (r == 0 && c == 0) {
+                continue;
+              }
+
+              if (dark == qrcode.isDark(row + r, col + c) ) {
+                sameCount += 1;
+              }
+            }
+          }
+
+          if (sameCount > 5) {
+            lostPoint += (3 + sameCount - 5);
+          }
+        }
+      };
+
+      // LEVEL2
+
+      for (var row = 0; row < moduleCount - 1; row += 1) {
+        for (var col = 0; col < moduleCount - 1; col += 1) {
+          var count = 0;
+          if (qrcode.isDark(row, col) ) count += 1;
+          if (qrcode.isDark(row + 1, col) ) count += 1;
+          if (qrcode.isDark(row, col + 1) ) count += 1;
+          if (qrcode.isDark(row + 1, col + 1) ) count += 1;
+          if (count == 0 || count == 4) {
+            lostPoint += 3;
+          }
+        }
+      }
+
+      // LEVEL3
+
+      for (var row = 0; row < moduleCount; row += 1) {
+        for (var col = 0; col < moduleCount - 6; col += 1) {
+          if (qrcode.isDark(row, col)
+              && !qrcode.isDark(row, col + 1)
+              &&  qrcode.isDark(row, col + 2)
+              &&  qrcode.isDark(row, col + 3)
+              &&  qrcode.isDark(row, col + 4)
+              && !qrcode.isDark(row, col + 5)
+              &&  qrcode.isDark(row, col + 6) ) {
+            lostPoint += 40;
+          }
+        }
+      }
+
+      for (var col = 0; col < moduleCount; col += 1) {
+        for (var row = 0; row < moduleCount - 6; row += 1) {
+          if (qrcode.isDark(row, col)
+              && !qrcode.isDark(row + 1, col)
+              &&  qrcode.isDark(row + 2, col)
+              &&  qrcode.isDark(row + 3, col)
+              &&  qrcode.isDark(row + 4, col)
+              && !qrcode.isDark(row + 5, col)
+              &&  qrcode.isDark(row + 6, col) ) {
+            lostPoint += 40;
+          }
+        }
+      }
+
+      // LEVEL4
+
+      var darkCount = 0;
+
+      for (var col = 0; col < moduleCount; col += 1) {
+        for (var row = 0; row < moduleCount; row += 1) {
+          if (qrcode.isDark(row, col) ) {
+            darkCount += 1;
+          }
+        }
+      }
+
+      var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5;
+      lostPoint += ratio * 10;
+
+      return lostPoint;
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // QRMath
+  //---------------------------------------------------------------------
+
+  var QRMath = function() {
+
+    var EXP_TABLE = new Array(256);
+    var LOG_TABLE = new Array(256);
+
+    // initialize tables
+    for (var i = 0; i < 8; i += 1) {
+      EXP_TABLE[i] = 1 << i;
+    }
+    for (var i = 8; i < 256; i += 1) {
+      EXP_TABLE[i] = EXP_TABLE[i - 4]
+        ^ EXP_TABLE[i - 5]
+        ^ EXP_TABLE[i - 6]
+        ^ EXP_TABLE[i - 8];
+    }
+    for (var i = 0; i < 255; i += 1) {
+      LOG_TABLE[EXP_TABLE[i] ] = i;
+    }
+
+    var _this = {};
+
+    _this.glog = function(n) {
+
+      if (n < 1) {
+        throw 'glog(' + n + ')';
+      }
+
+      return LOG_TABLE[n];
+    };
+
+    _this.gexp = function(n) {
+
+      while (n < 0) {
+        n += 255;
+      }
+
+      while (n >= 256) {
+        n -= 255;
+      }
+
+      return EXP_TABLE[n];
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // qrPolynomial
+  //---------------------------------------------------------------------
+
+  function qrPolynomial(num, shift) {
+
+    if (typeof num.length == 'undefined') {
+      throw num.length + '/' + shift;
+    }
+
+    var _num = function() {
+      var offset = 0;
+      while (offset < num.length && num[offset] == 0) {
+        offset += 1;
+      }
+      var _num = new Array(num.length - offset + shift);
+      for (var i = 0; i < num.length - offset; i += 1) {
+        _num[i] = num[i + offset];
+      }
+      return _num;
+    }();
+
+    var _this = {};
+
+    _this.getAt = function(index) {
+      return _num[index];
+    };
+
+    _this.getLength = function() {
+      return _num.length;
+    };
+
+    _this.multiply = function(e) {
+
+      var num = new Array(_this.getLength() + e.getLength() - 1);
+
+      for (var i = 0; i < _this.getLength(); i += 1) {
+        for (var j = 0; j < e.getLength(); j += 1) {
+          num[i + j] ^= QRMath.gexp(QRMath.glog(_this.getAt(i) ) + QRMath.glog(e.getAt(j) ) );
+        }
+      }
+
+      return qrPolynomial(num, 0);
+    };
+
+    _this.mod = function(e) {
+
+      if (_this.getLength() - e.getLength() < 0) {
+        return _this;
+      }
+
+      var ratio = QRMath.glog(_this.getAt(0) ) - QRMath.glog(e.getAt(0) );
+
+      var num = new Array(_this.getLength() );
+      for (var i = 0; i < _this.getLength(); i += 1) {
+        num[i] = _this.getAt(i);
+      }
+
+      for (var i = 0; i < e.getLength(); i += 1) {
+        num[i] ^= QRMath.gexp(QRMath.glog(e.getAt(i) ) + ratio);
+      }
+
+      // recursive call
+      return qrPolynomial(num, 0).mod(e);
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // QRRSBlock
+  //---------------------------------------------------------------------
+
+  var QRRSBlock = function() {
+
+    var RS_BLOCK_TABLE = [
+
+      // L
+      // M
+      // Q
+      // H
+
+      // 1
+      [1, 26, 19],
+      [1, 26, 16],
+      [1, 26, 13],
+      [1, 26, 9],
+
+      // 2
+      [1, 44, 34],
+      [1, 44, 28],
+      [1, 44, 22],
+      [1, 44, 16],
+
+      // 3
+      [1, 70, 55],
+      [1, 70, 44],
+      [2, 35, 17],
+      [2, 35, 13],
+
+      // 4
+      [1, 100, 80],
+      [2, 50, 32],
+      [2, 50, 24],
+      [4, 25, 9],
+
+      // 5
+      [1, 134, 108],
+      [2, 67, 43],
+      [2, 33, 15, 2, 34, 16],
+      [2, 33, 11, 2, 34, 12],
+
+      // 6
+      [2, 86, 68],
+      [4, 43, 27],
+      [4, 43, 19],
+      [4, 43, 15],
+
+      // 7
+      [2, 98, 78],
+      [4, 49, 31],
+      [2, 32, 14, 4, 33, 15],
+      [4, 39, 13, 1, 40, 14],
+
+      // 8
+      [2, 121, 97],
+      [2, 60, 38, 2, 61, 39],
+      [4, 40, 18, 2, 41, 19],
+      [4, 40, 14, 2, 41, 15],
+
+      // 9
+      [2, 146, 116],
+      [3, 58, 36, 2, 59, 37],
+      [4, 36, 16, 4, 37, 17],
+      [4, 36, 12, 4, 37, 13],
+
+      // 10
+      [2, 86, 68, 2, 87, 69],
+      [4, 69, 43, 1, 70, 44],
+      [6, 43, 19, 2, 44, 20],
+      [6, 43, 15, 2, 44, 16],
+
+      // 11
+      [4, 101, 81],
+      [1, 80, 50, 4, 81, 51],
+      [4, 50, 22, 4, 51, 23],
+      [3, 36, 12, 8, 37, 13],
+
+      // 12
+      [2, 116, 92, 2, 117, 93],
+      [6, 58, 36, 2, 59, 37],
+      [4, 46, 20, 6, 47, 21],
+      [7, 42, 14, 4, 43, 15],
+
+      // 13
+      [4, 133, 107],
+      [8, 59, 37, 1, 60, 38],
+      [8, 44, 20, 4, 45, 21],
+      [12, 33, 11, 4, 34, 12],
+
+      // 14
+      [3, 145, 115, 1, 146, 116],
+      [4, 64, 40, 5, 65, 41],
+      [11, 36, 16, 5, 37, 17],
+      [11, 36, 12, 5, 37, 13],
+
+      // 15
+      [5, 109, 87, 1, 110, 88],
+      [5, 65, 41, 5, 66, 42],
+      [5, 54, 24, 7, 55, 25],
+      [11, 36, 12, 7, 37, 13],
+
+      // 16
+      [5, 122, 98, 1, 123, 99],
+      [7, 73, 45, 3, 74, 46],
+      [15, 43, 19, 2, 44, 20],
+      [3, 45, 15, 13, 46, 16],
+
+      // 17
+      [1, 135, 107, 5, 136, 108],
+      [10, 74, 46, 1, 75, 47],
+      [1, 50, 22, 15, 51, 23],
+      [2, 42, 14, 17, 43, 15],
+
+      // 18
+      [5, 150, 120, 1, 151, 121],
+      [9, 69, 43, 4, 70, 44],
+      [17, 50, 22, 1, 51, 23],
+      [2, 42, 14, 19, 43, 15],
+
+      // 19
+      [3, 141, 113, 4, 142, 114],
+      [3, 70, 44, 11, 71, 45],
+      [17, 47, 21, 4, 48, 22],
+      [9, 39, 13, 16, 40, 14],
+
+      // 20
+      [3, 135, 107, 5, 136, 108],
+      [3, 67, 41, 13, 68, 42],
+      [15, 54, 24, 5, 55, 25],
+      [15, 43, 15, 10, 44, 16],
+
+      // 21
+      [4, 144, 116, 4, 145, 117],
+      [17, 68, 42],
+      [17, 50, 22, 6, 51, 23],
+      [19, 46, 16, 6, 47, 17],
+
+      // 22
+      [2, 139, 111, 7, 140, 112],
+      [17, 74, 46],
+      [7, 54, 24, 16, 55, 25],
+      [34, 37, 13],
+
+      // 23
+      [4, 151, 121, 5, 152, 122],
+      [4, 75, 47, 14, 76, 48],
+      [11, 54, 24, 14, 55, 25],
+      [16, 45, 15, 14, 46, 16],
+
+      // 24
+      [6, 147, 117, 4, 148, 118],
+      [6, 73, 45, 14, 74, 46],
+      [11, 54, 24, 16, 55, 25],
+      [30, 46, 16, 2, 47, 17],
+
+      // 25
+      [8, 132, 106, 4, 133, 107],
+      [8, 75, 47, 13, 76, 48],
+      [7, 54, 24, 22, 55, 25],
+      [22, 45, 15, 13, 46, 16],
+
+      // 26
+      [10, 142, 114, 2, 143, 115],
+      [19, 74, 46, 4, 75, 47],
+      [28, 50, 22, 6, 51, 23],
+      [33, 46, 16, 4, 47, 17],
+
+      // 27
+      [8, 152, 122, 4, 153, 123],
+      [22, 73, 45, 3, 74, 46],
+      [8, 53, 23, 26, 54, 24],
+      [12, 45, 15, 28, 46, 16],
+
+      // 28
+      [3, 147, 117, 10, 148, 118],
+      [3, 73, 45, 23, 74, 46],
+      [4, 54, 24, 31, 55, 25],
+      [11, 45, 15, 31, 46, 16],
+
+      // 29
+      [7, 146, 116, 7, 147, 117],
+      [21, 73, 45, 7, 74, 46],
+      [1, 53, 23, 37, 54, 24],
+      [19, 45, 15, 26, 46, 16],
+
+      // 30
+      [5, 145, 115, 10, 146, 116],
+      [19, 75, 47, 10, 76, 48],
+      [15, 54, 24, 25, 55, 25],
+      [23, 45, 15, 25, 46, 16],
+
+      // 31
+      [13, 145, 115, 3, 146, 116],
+      [2, 74, 46, 29, 75, 47],
+      [42, 54, 24, 1, 55, 25],
+      [23, 45, 15, 28, 46, 16],
+
+      // 32
+      [17, 145, 115],
+      [10, 74, 46, 23, 75, 47],
+      [10, 54, 24, 35, 55, 25],
+      [19, 45, 15, 35, 46, 16],
+
+      // 33
+      [17, 145, 115, 1, 146, 116],
+      [14, 74, 46, 21, 75, 47],
+      [29, 54, 24, 19, 55, 25],
+      [11, 45, 15, 46, 46, 16],
+
+      // 34
+      [13, 145, 115, 6, 146, 116],
+      [14, 74, 46, 23, 75, 47],
+      [44, 54, 24, 7, 55, 25],
+      [59, 46, 16, 1, 47, 17],
+
+      // 35
+      [12, 151, 121, 7, 152, 122],
+      [12, 75, 47, 26, 76, 48],
+      [39, 54, 24, 14, 55, 25],
+      [22, 45, 15, 41, 46, 16],
+
+      // 36
+      [6, 151, 121, 14, 152, 122],
+      [6, 75, 47, 34, 76, 48],
+      [46, 54, 24, 10, 55, 25],
+      [2, 45, 15, 64, 46, 16],
+
+      // 37
+      [17, 152, 122, 4, 153, 123],
+      [29, 74, 46, 14, 75, 47],
+      [49, 54, 24, 10, 55, 25],
+      [24, 45, 15, 46, 46, 16],
+
+      // 38
+      [4, 152, 122, 18, 153, 123],
+      [13, 74, 46, 32, 75, 47],
+      [48, 54, 24, 14, 55, 25],
+      [42, 45, 15, 32, 46, 16],
+
+      // 39
+      [20, 147, 117, 4, 148, 118],
+      [40, 75, 47, 7, 76, 48],
+      [43, 54, 24, 22, 55, 25],
+      [10, 45, 15, 67, 46, 16],
+
+      // 40
+      [19, 148, 118, 6, 149, 119],
+      [18, 75, 47, 31, 76, 48],
+      [34, 54, 24, 34, 55, 25],
+      [20, 45, 15, 61, 46, 16]
+    ];
+
+    var qrRSBlock = function(totalCount, dataCount) {
+      var _this = {};
+      _this.totalCount = totalCount;
+      _this.dataCount = dataCount;
+      return _this;
+    };
+
+    var _this = {};
+
+    var getRsBlockTable = function(typeNumber, errorCorrectionLevel) {
+
+      switch(errorCorrectionLevel) {
+      case QRErrorCorrectionLevel.L :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
+      case QRErrorCorrectionLevel.M :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
+      case QRErrorCorrectionLevel.Q :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
+      case QRErrorCorrectionLevel.H :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
+      default :
+        return undefined;
+      }
+    };
+
+    _this.getRSBlocks = function(typeNumber, errorCorrectionLevel) {
+
+      var rsBlock = getRsBlockTable(typeNumber, errorCorrectionLevel);
+
+      if (typeof rsBlock == 'undefined') {
+        throw 'bad rs block @ typeNumber:' + typeNumber +
+            '/errorCorrectionLevel:' + errorCorrectionLevel;
+      }
+
+      var length = rsBlock.length / 3;
+
+      var list = [];
+
+      for (var i = 0; i < length; i += 1) {
+
+        var count = rsBlock[i * 3 + 0];
+        var totalCount = rsBlock[i * 3 + 1];
+        var dataCount = rsBlock[i * 3 + 2];
+
+        for (var j = 0; j < count; j += 1) {
+          list.push(qrRSBlock(totalCount, dataCount) );
+        }
+      }
+
+      return list;
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // qrBitBuffer
+  //---------------------------------------------------------------------
+
+  var qrBitBuffer = function() {
+
+    var _buffer = [];
+    var _length = 0;
+
+    var _this = {};
+
+    _this.getBuffer = function() {
+      return _buffer;
+    };
+
+    _this.getAt = function(index) {
+      var bufIndex = Math.floor(index / 8);
+      return ( (_buffer[bufIndex] >>> (7 - index % 8) ) & 1) == 1;
+    };
+
+    _this.put = function(num, length) {
+      for (var i = 0; i < length; i += 1) {
+        _this.putBit( ( (num >>> (length - i - 1) ) & 1) == 1);
+      }
+    };
+
+    _this.getLengthInBits = function() {
+      return _length;
+    };
+
+    _this.putBit = function(bit) {
+
+      var bufIndex = Math.floor(_length / 8);
+      if (_buffer.length <= bufIndex) {
+        _buffer.push(0);
+      }
+
+      if (bit) {
+        _buffer[bufIndex] |= (0x80 >>> (_length % 8) );
+      }
+
+      _length += 1;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrNumber
+  //---------------------------------------------------------------------
+
+  var qrNumber = function(data) {
+
+    var _mode = QRMode.MODE_NUMBER;
+    var _data = data;
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _data.length;
+    };
+
+    _this.write = function(buffer) {
+
+      var data = _data;
+
+      var i = 0;
+
+      while (i + 2 < data.length) {
+        buffer.put(strToNum(data.substring(i, i + 3) ), 10);
+        i += 3;
+      }
+
+      if (i < data.length) {
+        if (data.length - i == 1) {
+          buffer.put(strToNum(data.substring(i, i + 1) ), 4);
+        } else if (data.length - i == 2) {
+          buffer.put(strToNum(data.substring(i, i + 2) ), 7);
+        }
+      }
+    };
+
+    var strToNum = function(s) {
+      var num = 0;
+      for (var i = 0; i < s.length; i += 1) {
+        num = num * 10 + chatToNum(s.charAt(i) );
+      }
+      return num;
+    };
+
+    var chatToNum = function(c) {
+      if ('0' <= c && c <= '9') {
+        return c.charCodeAt(0) - '0'.charCodeAt(0);
+      }
+      throw 'illegal char :' + c;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrAlphaNum
+  //---------------------------------------------------------------------
+
+  var qrAlphaNum = function(data) {
+
+    var _mode = QRMode.MODE_ALPHA_NUM;
+    var _data = data;
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _data.length;
+    };
+
+    _this.write = function(buffer) {
+
+      var s = _data;
+
+      var i = 0;
+
+      while (i + 1 < s.length) {
+        buffer.put(
+          getCode(s.charAt(i) ) * 45 +
+          getCode(s.charAt(i + 1) ), 11);
+        i += 2;
+      }
+
+      if (i < s.length) {
+        buffer.put(getCode(s.charAt(i) ), 6);
+      }
+    };
+
+    var getCode = function(c) {
+
+      if ('0' <= c && c <= '9') {
+        return c.charCodeAt(0) - '0'.charCodeAt(0);
+      } else if ('A' <= c && c <= 'Z') {
+        return c.charCodeAt(0) - 'A'.charCodeAt(0) + 10;
+      } else {
+        switch (c) {
+        case ' ' : return 36;
+        case '$' : return 37;
+        case '%' : return 38;
+        case '*' : return 39;
+        case '+' : return 40;
+        case '-' : return 41;
+        case '.' : return 42;
+        case '/' : return 43;
+        case ':' : return 44;
+        default :
+          throw 'illegal char :' + c;
+        }
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qr8BitByte
+  //---------------------------------------------------------------------
+
+  var qr8BitByte = function(data) {
+
+    var _mode = QRMode.MODE_8BIT_BYTE;
+    var _data = data;
+    var _bytes = qrcode.stringToBytes(data);
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _bytes.length;
+    };
+
+    _this.write = function(buffer) {
+      for (var i = 0; i < _bytes.length; i += 1) {
+        buffer.put(_bytes[i], 8);
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrKanji
+  //---------------------------------------------------------------------
+
+  var qrKanji = function(data) {
+
+    var _mode = QRMode.MODE_KANJI;
+    var _data = data;
+
+    var stringToBytes = qrcode.stringToBytesFuncs['SJIS'];
+    if (!stringToBytes) {
+      throw 'sjis not supported.';
+    }
+    !function(c, code) {
+      // self test for sjis support.
+      var test = stringToBytes(c);
+      if (test.length != 2 || ( (test[0] << 8) | test[1]) != code) {
+        throw 'sjis not supported.';
+      }
+    }('\u53cb', 0x9746);
+
+    var _bytes = stringToBytes(data);
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return ~~(_bytes.length / 2);
+    };
+
+    _this.write = function(buffer) {
+
+      var data = _bytes;
+
+      var i = 0;
+
+      while (i + 1 < data.length) {
+
+        var c = ( (0xff & data[i]) << 8) | (0xff & data[i + 1]);
+
+        if (0x8140 <= c && c <= 0x9FFC) {
+          c -= 0x8140;
+        } else if (0xE040 <= c && c <= 0xEBBF) {
+          c -= 0xC140;
+        } else {
+          throw 'illegal char at ' + (i + 1) + '/' + c;
+        }
+
+        c = ( (c >>> 8) & 0xff) * 0xC0 + (c & 0xff);
+
+        buffer.put(c, 13);
+
+        i += 2;
+      }
+
+      if (i < data.length) {
+        throw 'illegal char at ' + (i + 1);
+      }
+    };
+
+    return _this;
+  };
+
+  //=====================================================================
+  // GIF Support etc.
+  //
+
+  //---------------------------------------------------------------------
+  // byteArrayOutputStream
+  //---------------------------------------------------------------------
+
+  var byteArrayOutputStream = function() {
+
+    var _bytes = [];
+
+    var _this = {};
+
+    _this.writeByte = function(b) {
+      _bytes.push(b & 0xff);
+    };
+
+    _this.writeShort = function(i) {
+      _this.writeByte(i);
+      _this.writeByte(i >>> 8);
+    };
+
+    _this.writeBytes = function(b, off, len) {
+      off = off || 0;
+      len = len || b.length;
+      for (var i = 0; i < len; i += 1) {
+        _this.writeByte(b[i + off]);
+      }
+    };
+
+    _this.writeString = function(s) {
+      for (var i = 0; i < s.length; i += 1) {
+        _this.writeByte(s.charCodeAt(i) );
+      }
+    };
+
+    _this.toByteArray = function() {
+      return _bytes;
+    };
+
+    _this.toString = function() {
+      var s = '';
+      s += '[';
+      for (var i = 0; i < _bytes.length; i += 1) {
+        if (i > 0) {
+          s += ',';
+        }
+        s += _bytes[i];
+      }
+      s += ']';
+      return s;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // base64EncodeOutputStream
+  //---------------------------------------------------------------------
+
+  var base64EncodeOutputStream = function() {
+
+    var _buffer = 0;
+    var _buflen = 0;
+    var _length = 0;
+    var _base64 = '';
+
+    var _this = {};
+
+    var writeEncoded = function(b) {
+      _base64 += String.fromCharCode(encode(b & 0x3f) );
+    };
+
+    var encode = function(n) {
+      if (n < 0) {
+        // error.
+      } else if (n < 26) {
+        return 0x41 + n;
+      } else if (n < 52) {
+        return 0x61 + (n - 26);
+      } else if (n < 62) {
+        return 0x30 + (n - 52);
+      } else if (n == 62) {
+        return 0x2b;
+      } else if (n == 63) {
+        return 0x2f;
+      }
+      throw 'n:' + n;
+    };
+
+    _this.writeByte = function(n) {
+
+      _buffer = (_buffer << 8) | (n & 0xff);
+      _buflen += 8;
+      _length += 1;
+
+      while (_buflen >= 6) {
+        writeEncoded(_buffer >>> (_buflen - 6) );
+        _buflen -= 6;
+      }
+    };
+
+    _this.flush = function() {
+
+      if (_buflen > 0) {
+        writeEncoded(_buffer << (6 - _buflen) );
+        _buffer = 0;
+        _buflen = 0;
+      }
+
+      if (_length % 3 != 0) {
+        // padding
+        var padlen = 3 - _length % 3;
+        for (var i = 0; i < padlen; i += 1) {
+          _base64 += '=';
+        }
+      }
+    };
+
+    _this.toString = function() {
+      return _base64;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // base64DecodeInputStream
+  //---------------------------------------------------------------------
+
+  var base64DecodeInputStream = function(str) {
+
+    var _str = str;
+    var _pos = 0;
+    var _buffer = 0;
+    var _buflen = 0;
+
+    var _this = {};
+
+    _this.read = function() {
+
+      while (_buflen < 8) {
+
+        if (_pos >= _str.length) {
+          if (_buflen == 0) {
+            return -1;
+          }
+          throw 'unexpected end of file./' + _buflen;
+        }
+
+        var c = _str.charAt(_pos);
+        _pos += 1;
+
+        if (c == '=') {
+          _buflen = 0;
+          return -1;
+        } else if (c.match(/^\s$/) ) {
+          // ignore if whitespace.
+          continue;
+        }
+
+        _buffer = (_buffer << 6) | decode(c.charCodeAt(0) );
+        _buflen += 6;
+      }
+
+      var n = (_buffer >>> (_buflen - 8) ) & 0xff;
+      _buflen -= 8;
+      return n;
+    };
+
+    var decode = function(c) {
+      if (0x41 <= c && c <= 0x5a) {
+        return c - 0x41;
+      } else if (0x61 <= c && c <= 0x7a) {
+        return c - 0x61 + 26;
+      } else if (0x30 <= c && c <= 0x39) {
+        return c - 0x30 + 52;
+      } else if (c == 0x2b) {
+        return 62;
+      } else if (c == 0x2f) {
+        return 63;
+      } else {
+        throw 'c:' + c;
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // gifImage (B/W)
+  //---------------------------------------------------------------------
+
+  var gifImage = function(width, height) {
+
+    var _width = width;
+    var _height = height;
+    var _data = new Array(width * height);
+
+    var _this = {};
+
+    _this.setPixel = function(x, y, pixel) {
+      _data[y * _width + x] = pixel;
+    };
+
+    _this.write = function(out) {
+
+      //---------------------------------
+      // GIF Signature
+
+      out.writeString('GIF87a');
+
+      //---------------------------------
+      // Screen Descriptor
+
+      out.writeShort(_width);
+      out.writeShort(_height);
+
+      out.writeByte(0x80); // 2bit
+      out.writeByte(0);
+      out.writeByte(0);
+
+      //---------------------------------
+      // Global Color Map
+
+      // black
+      out.writeByte(0x00);
+      out.writeByte(0x00);
+      out.writeByte(0x00);
+
+      // white
+      out.writeByte(0xff);
+      out.writeByte(0xff);
+      out.writeByte(0xff);
+
+      //---------------------------------
+      // Image Descriptor
+
+      out.writeString(',');
+      out.writeShort(0);
+      out.writeShort(0);
+      out.writeShort(_width);
+      out.writeShort(_height);
+      out.writeByte(0);
+
+      //---------------------------------
+      // Local Color Map
+
+      //---------------------------------
+      // Raster Data
+
+      var lzwMinCodeSize = 2;
+      var raster = getLZWRaster(lzwMinCodeSize);
+
+      out.writeByte(lzwMinCodeSize);
+
+      var offset = 0;
+
+      while (raster.length - offset > 255) {
+        out.writeByte(255);
+        out.writeBytes(raster, offset, 255);
+        offset += 255;
+      }
+
+      out.writeByte(raster.length - offset);
+      out.writeBytes(raster, offset, raster.length - offset);
+      out.writeByte(0x00);
+
+      //---------------------------------
+      // GIF Terminator
+      out.writeString(';');
+    };
+
+    var bitOutputStream = function(out) {
+
+      var _out = out;
+      var _bitLength = 0;
+      var _bitBuffer = 0;
+
+      var _this = {};
+
+      _this.write = function(data, length) {
+
+        if ( (data >>> length) != 0) {
+          throw 'length over';
+        }
+
+        while (_bitLength + length >= 8) {
+          _out.writeByte(0xff & ( (data << _bitLength) | _bitBuffer) );
+          length -= (8 - _bitLength);
+          data >>>= (8 - _bitLength);
+          _bitBuffer = 0;
+          _bitLength = 0;
+        }
+
+        _bitBuffer = (data << _bitLength) | _bitBuffer;
+        _bitLength = _bitLength + length;
+      };
+
+      _this.flush = function() {
+        if (_bitLength > 0) {
+          _out.writeByte(_bitBuffer);
+        }
+      };
+
+      return _this;
+    };
+
+    var getLZWRaster = function(lzwMinCodeSize) {
+
+      var clearCode = 1 << lzwMinCodeSize;
+      var endCode = (1 << lzwMinCodeSize) + 1;
+      var bitLength = lzwMinCodeSize + 1;
+
+      // Setup LZWTable
+      var table = lzwTable();
+
+      for (var i = 0; i < clearCode; i += 1) {
+        table.add(String.fromCharCode(i) );
+      }
+      table.add(String.fromCharCode(clearCode) );
+      table.add(String.fromCharCode(endCode) );
+
+      var byteOut = byteArrayOutputStream();
+      var bitOut = bitOutputStream(byteOut);
+
+      // clear code
+      bitOut.write(clearCode, bitLength);
+
+      var dataIndex = 0;
+
+      var s = String.fromCharCode(_data[dataIndex]);
+      dataIndex += 1;
+
+      while (dataIndex < _data.length) {
+
+        var c = String.fromCharCode(_data[dataIndex]);
+        dataIndex += 1;
+
+        if (table.contains(s + c) ) {
+
+          s = s + c;
+
+        } else {
+
+          bitOut.write(table.indexOf(s), bitLength);
+
+          if (table.size() < 0xfff) {
+
+            if (table.size() == (1 << bitLength) ) {
+              bitLength += 1;
+            }
+
+            table.add(s + c);
+          }
+
+          s = c;
+        }
+      }
+
+      bitOut.write(table.indexOf(s), bitLength);
+
+      // end code
+      bitOut.write(endCode, bitLength);
+
+      bitOut.flush();
+
+      return byteOut.toByteArray();
+    };
+
+    var lzwTable = function() {
+
+      var _map = {};
+      var _size = 0;
+
+      var _this = {};
+
+      _this.add = function(key) {
+        if (_this.contains(key) ) {
+          throw 'dup key:' + key;
+        }
+        _map[key] = _size;
+        _size += 1;
+      };
+
+      _this.size = function() {
+        return _size;
+      };
+
+      _this.indexOf = function(key) {
+        return _map[key];
+      };
+
+      _this.contains = function(key) {
+        return typeof _map[key] != 'undefined';
+      };
+
+      return _this;
+    };
+
+    return _this;
+  };
+
+  var createDataURL = function(width, height, getPixel) {
+    var gif = gifImage(width, height);
+    for (var y = 0; y < height; y += 1) {
+      for (var x = 0; x < width; x += 1) {
+        gif.setPixel(x, y, getPixel(x, y) );
+      }
+    }
+
+    var b = byteArrayOutputStream();
+    gif.write(b);
+
+    var base64 = base64EncodeOutputStream();
+    var bytes = b.toByteArray();
+    for (var i = 0; i < bytes.length; i += 1) {
+      base64.writeByte(bytes[i]);
+    }
+    base64.flush();
+
+    return 'data:image/gif;base64,' + base64;
+  };
+
+  //---------------------------------------------------------------------
+  // returns qrcode function.
+
+  return qrcode;
+}();
+
+// multibyte support
+!function() {
+
+  qrcode.stringToBytesFuncs['UTF-8'] = function(s) {
+    // http://stackoverflow.com/questions/18729405/how-to-convert-utf8-string-to-byte-array
+    function toUTF8Array(str) {
+      var utf8 = [];
+      for (var i=0; i < str.length; i++) {
+        var charcode = str.charCodeAt(i);
+        if (charcode < 0x80) utf8.push(charcode);
+        else if (charcode < 0x800) {
+          utf8.push(0xc0 | (charcode >> 6),
+              0x80 | (charcode & 0x3f));
+        }
+        else if (charcode < 0xd800 || charcode >= 0xe000) {
+          utf8.push(0xe0 | (charcode >> 12),
+              0x80 | ((charcode>>6) & 0x3f),
+              0x80 | (charcode & 0x3f));
+        }
+        // surrogate pair
+        else {
+          i++;
+          // UTF-16 encodes 0x10000-0x10FFFF by
+          // subtracting 0x10000 and splitting the
+          // 20 bits of 0x0-0xFFFFF into two halves
+          charcode = 0x10000 + (((charcode & 0x3ff)<<10)
+            | (str.charCodeAt(i) & 0x3ff));
+          utf8.push(0xf0 | (charcode >>18),
+              0x80 | ((charcode>>12) & 0x3f),
+              0x80 | ((charcode>>6) & 0x3f),
+              0x80 | (charcode & 0x3f));
+        }
+      }
+      return utf8;
+    }
+    return toUTF8Array(s);
+  };
+
+}();
+
+(function (factory) {
+  if (typeof define === 'function' && define.amd) {
+      define([], factory);
+  } else if (typeof exports === 'object') {
+      module.exports = factory();
+  }
+}(function () {
+    return qrcode;
+}));
+
+if(typeof window!=='undefined' && typeof qrcode!=='undefined'){window.qrcode=qrcode;}
+</script>
+
+
+<script>
+/* ============================================================
+   DADOS DE EXEMPLO  (importados de Base_Dados_Procedimentos.xlsx)
+   ============================================================ */
+const CATEGORIAS = ["Via Aérea","Medicação","Triagem","Monitorização","Feridas e Curativos","Emergências","Outro"];
+const ESTADOS = ["Vigente","Em Revisão","Obsoleto"];
+
+const SEED = [
+  {codigo:"SPed_PRO_005/00", titulo:"Administração de Terapêutica Inalatória por Câmara Expansora em Pediatria", categoria:"Medicação", area:"Pediatria / Medicação", versao:"00", data_revisao:"2025-07-24", estado:"Vigente", link_documento:"AdministraçãoTerapêuticaInalatóriaCamaraExpansoraPediatria.pdf", palavras_chave:["Administração","câmara expansora","inaladores","aerossolterapia"], responsaveis:"Enf.ª Ana Rocha; Enf.ª Celina Casanova; Enf.ª Paula Cardoso"},
+  {codigo:"SU_PTC_003/00", titulo:"Via Verde AVC", categoria:"Emergências", area:"Urgência / Via Verde / Neurologia", versao:"00", data_revisao:"2025-12-04", estado:"Vigente", link_documento:"Documento - 2025-12-05T122329.948.pdf", palavras_chave:["Acidente Vascular Cerebral","trombólise","trombectomia"], responsaveis:"Rui Miguel Pereira Gonçalves; Maria Teresa da Silva Ferreira; António Carlos Sousa Vilas Boas"},
+  {codigo:"CQS_PRO_071/01", titulo:"Prevenção e intervenção na queda do adulto", categoria:"Outro", area:"Qualidade / Segurança do Doente", versao:"01", data_revisao:"2026-04-23", estado:"Vigente", link_documento:"Prevenção e intervenção na queda no adulto.pdf", palavras_chave:["Queda","Morse"], responsaveis:"Almerindo Domingues; Anabela Monteiro; Clara Silva; Débora Oliveira; Evelina Lemos; Isabel Azevedo; Tânia Simões; Teresa Alves"},
+  {codigo:"EGR_PRO_003/00", titulo:"Metodologia de Análise de Riscos do Doente", categoria:"Outro", area:"Gestão do Risco / Segurança do Doente", versao:"00", data_revisao:"2026-03-26", estado:"Vigente", link_documento:"MetodologiaAnaliseRiscosDoente.pdf", palavras_chave:["Metodologia","análise","riscos"], responsaveis:"EGR / Tânia Esteves Simões"},
+  {codigo:"SU_IDT_001/00", titulo:"Inoperacionalidade dos Sistemas de Informação no Serviço de Urgência", categoria:"Outro", area:"Urgência / Sistemas de Informação", versao:"00", data_revisao:"2025-06-26", estado:"Vigente", link_documento:"InoperacionalidadeSistemaInformacaoSU.pdf", palavras_chave:["SU","falha informática"], responsaveis:"Enfº Vítor Rocha"},
+  {codigo:"SSST_PRO_001/01", titulo:"Procedimento para acidentes de trabalho/incidentes ou acontecimentos perigosos", categoria:"Outro", area:"Segurança e Saúde no Trabalho", versao:"01", data_revisao:"2026-03-05", estado:"Vigente", link_documento:"Proc_AcidentesTrabalho.pdf", palavras_chave:["Acidente de trabalho","Incidente","Participação"], responsaveis:"Paulo Arlindo Adão Alves Martins"},
+  {codigo:"Manual_001/00", titulo:"Plano de Catástrofe", categoria:"Emergências", area:"Emergência / Catástrofe", versao:"00", data_revisao:"2025-07-17", estado:"Vigente", link_documento:"PlanoCatastrofeHSMM.pdf", palavras_chave:["Catástrofe","Plano"], responsaveis:"André Gonçalves; Conceição Azevedo; David Moreira; Eva Prata; Fernando Silva; M.ª Paz Amorim; Paula Lourenço; Paulo Martins; Rui Gonçalves; Sílvia Silva; Teresa Ferreira"},
+  {codigo:"PRO_009/00", titulo:"Cuidados ao doente com dreno torácico: inserção, manutenção e remoção", categoria:"Via Aérea", area:"Urgência / Pneumologia / Técnicas Invasivas", versao:"00", data_revisao:"2025-12-18", estado:"Vigente", link_documento:"Proc_DrenoToracico.pdf", palavras_chave:["Dreno torácico","práticas seguras em saúde"], responsaveis:"Enfº Rui Gonçalves; Enfª Teresa Ferreira; Dra Catarina Giesta; Dra Daniela Alves"},
+  {codigo:"CQS_PRO_078/00", titulo:"Identificação Inequívoca do Doente", categoria:"Outro", area:"Qualidade / Segurança do Doente", versao:"00", data_revisao:"2026-04-09", estado:"Vigente", link_documento:"Proc_IdentifIneqDoente.pdf", palavras_chave:["Identificação","Pulseira","Segurança"], responsaveis:"Almerindo Domingues; Ana Arantes; Armanda Fernandes; Débora Oliveira; Luísa Alves; Tânia Simões; Teresa Alves"},
+  {codigo:"EGR_PRO_001/00", titulo:"Notificação de Incidentes", categoria:"Outro", area:"Gestão do Risco / Segurança do Doente", versao:"00", data_revisao:"2025-08-07", estado:"Vigente", link_documento:"ProcedNotificacaoIncidentes_HomologadoCA_Agosto2025.pdf", palavras_chave:["Incidente","Notificação","Segurança"], responsaveis:"Almerindo Domingues (EGR) / Tânia Simões"},
+  {codigo:"SF_PRO_001/00", titulo:"Medicamentos de Alta Vigilância", categoria:"Medicação", area:"Farmácia / Segurança do Medicamento", versao:"00", data_revisao:"2026-04-30", estado:"Vigente", link_documento:"Procedimento Medicação alta vigilância.pdf", palavras_chave:["Medicamentos Alta Vigilância","LASA","MAM"], responsaveis:"Alexandra Menezes; Débora Oliveira; Maria João Peixoto; Tânia Simões"},
+  {codigo:"PRO_001/00", titulo:"Abordagem Clínica na Anafilaxia", categoria:"Emergências", area:"Urgência / Alergologia / Emergência", versao:"00", data_revisao:"2025-01-13", estado:"Vigente", link_documento:"Procedimento_AbordagemClínicaAnafilaxia.pdf", palavras_chave:["Anafilaxia","Alergia","Hipersensibilidade"], responsaveis:"Rui Miguel Pereira Gonçalves; Marlene Cristina de Sousa Fernandes"},
+  {codigo:"PRO_008/00", titulo:"Colheita de sangue para hemocultura", categoria:"Outro", area:"Microbiologia / Práticas Clínicas / Infeção", versao:"00", data_revisao:"2025-12-11", estado:"Vigente", link_documento:"Procedimento_Hemoculturas.pdf", palavras_chave:["Hemoculturas","Práticas seguras","Infeções da corrente sanguínea"], responsaveis:"Enfª Teresa Ferreira; Ana Raquel Azevedo Vieira; Carlos André Ferreira Pinto Álvares de Carvalho"},
+  {codigo:"CQS_PRO_079/00", titulo:"Práticas Seguras na Preparação e Administração de Medicamentos", categoria:"Medicação", area:"Qualidade / Farmácia / Segurança do Medicamento", versao:"00", data_revisao:"2026-04-30", estado:"Vigente", link_documento:"Práticas Seguras na Preparação e Adm_Med.pdf", palavras_chave:["Administração","Boas Práticas","Medicação","Preparação","Terapêutica"], responsaveis:"Aura Gonçalves; Débora Oliveira; Elsa Sá; Paulo Vieira; Tânia Simões; Teresa Ferreira"},
+  {codigo:"SU_REG_001/00", titulo:"Regulamento Triagem de Manchester Serviço de Urgência", categoria:"Triagem", area:"Urgência / Triagem", versao:"00", data_revisao:"2025-03-20", estado:"Vigente", link_documento:"Regulamento de Triagem de Manchester.pdf", palavras_chave:["Triagem de Manchester","SU"], responsaveis:"Francisco Costa; Rui Gonçalves"},
+  {codigo:"SU_PTC_002/00", titulo:"Via Verde Coronária", categoria:"Emergências", area:"Urgência / Via Verde / Cardiologia", versao:"00", data_revisao:"2026-04-30", estado:"Vigente", link_documento:"Via Verde Coronária.pdf", palavras_chave:["Enfarte Agudo do Miocárdio","reperfusão","intervenção coronária percutânea primária"], responsaveis:"Joana Abreu; Rui Gonçalves; António Vilas Boas; Teresa Ferreira"},
+  {codigo:"SMI5_IT_001/00", titulo:"Cuidados à Boca ao Doente Hospitalizado", categoria:"Outro", area:"Enfermagem / Cuidados Básicos / Higiene Oral", versao:"00", data_revisao:"2025-11-28", estado:"Vigente", link_documento:"cuidadosBocaDoenteHospitalizado.pdf", palavras_chave:["Boca","hospitalizado"], responsaveis:"Joana Patrícia Cruz Torres; José Manuel Azevedo Lopes Ribeiro Castro; Maria João Costa Amaral Peixoto; Maria Luísa Oliveira Martins Albuquerque; Tiago André Batista Silva"},
+  {codigo:"SU_PTC_001/00", titulo:"Equipa de Emergência Médica Intra-Hospitalar (EEMI)", categoria:"Emergências", area:"Urgência / Emergência / Gestão Clínica", versao:"00", data_revisao:"2025-12-18", estado:"Vigente", link_documento:"Regulamento_EEMI.pdf", palavras_chave:["Equipa de Emergência Médica Intra-Hospitalar","Doente crítico"], responsaveis:"Rui Miguel Pereira Gonçalves; Carina Costa e Silva"}
+];
+
+// Ficheiros PDF efetivamente presentes na pasta (para marcar "indisponível")
+const PDFS_PRESENTES = new Set([
+  "AdministraçãoTerapêuticaInalatóriaCamaraExpansoraPediatria.pdf",
+  "Documento - 2025-12-05T122329.948.pdf",
+  "Prevenção e intervenção na queda no adulto.pdf",
+  "MetodologiaAnaliseRiscosDoente.pdf",
+  "InoperacionalidadeSistemaInformacaoSU.pdf",
+  "Proc_AcidentesTrabalho.pdf",
+  "Proc_DrenoToracico.pdf",
+  "Proc_IdentifIneqDoente.pdf",
+  "ProcedNotificacaoIncidentes_HomologadoCA_Agosto2025.pdf",
+  "Procedimento Medicação alta vigilância.pdf",
+  "Procedimento_AbordagemClínicaAnafilaxia.pdf",
+  "Procedimento_Hemoculturas.pdf",
+  "Práticas Seguras na Preparação e Adm_Med.pdf",
+  "Regulamento de Triagem de Manchester.pdf",
+  "Via Verde Coronária.pdf",
+  "cuidadosBocaDoenteHospitalizado.pdf",
+  "Regulamento_EEMI.pdf"
+]);
+
+const DEFAULT_USERS = [
+  {email:"enfermeiro@su.pt", pass:"enfermeiro", nome:"Enfermeiro(a) SU", role:"enfermeiro"},
+  {email:"gestor@su.pt", pass:"gestor", nome:"Gestor(a)", role:"gestor"}
+];
+
+/* Campos do resumo / operacionalização */
+const RESUMO_SECOES = [
+  {k:"objetivo",    label:"Objetivo"},
+  {k:"indicacoes",  label:"Indicações"},
+  {k:"material",    label:"Material"},
+  {k:"passos",      label:"Operacionalização (passos)"},
+  {k:"precaucoes",  label:"Precauções / Notas"}
+];
+
+/* Resumos / operacionalização — RASCUNHOS a validar clinicamente. Chaveados por código.
+   Listas: uma linha por item (mostradas como tópicos). */
+const RESUMOS = {
+  "SPed_PRO_005/00": {
+    objetivo:"Uniformizar a administração de terapêutica inalatória por câmara expansora em pediatria, garantindo a eficácia do medicamento inalado e reduzindo efeitos adversos sistémicos.",
+    indicacoes:"Administração de broncodilatadores ou corticoides inalados a crianças/adolescentes\nUso de câmara expansora, com ou sem máscara, conforme idade e colaboração da criança",
+    material:"Câmara expansora (esterilizada ou da própria criança)\nMáscara facial ou bucal\nInalador pressurizado com a terapêutica prescrita",
+    passos:"Lavar as mãos\nConfirmar a prescrição da terapêutica\nReunir e adequar o material (câmara + máscara/bucal)\nAgitar o inalador e acoplar à câmara expansora\nAdaptar a máscara/bucal e administrar a dose conforme a técnica\nAguardar entre doses quando prescrita mais do que uma\nDesadaptar e arrumar o material\nReforçar o ensino aos pais/criança sobre técnica e manutenção",
+    precaucoes:"Câmara e máscara de uso exclusivo do doente\nEvitar erros comuns: não agitar o inalador antes, má coordenação disparo/inspiração\nVigiar o número de doses restantes do inalador"
+  },
+  "SU_PTC_003/00": {
+    objetivo:"Orientar e agilizar o tratamento de reperfusão do doente com AVC isquémico agudo (Via Verde intra-hospitalar AVC).",
+    indicacoes:"Suspeita de AVC com tempo de evolução inferior a 6 horas\nAusência de dependência prévia\nIdade superior a 18 anos\nDéfice neurológico focal súbito (Escala de Cincinnati)",
+    material:"Acesso venoso (2 cateteres periféricos)\nMonitorização hemodinâmica\nTAC crânio-encefálica urgente",
+    passos:"Identificar/triar como Via Verde AVC e ativar o percurso\nMonitorizar TA, FC, temperatura, glicemia capilar, SpO2 e FR\nAvaliar Escala de Coma de Glasgow e NIHSS\nCorrigir glicemia inferior a 50 mg/dL com soro glicosado hipertónico\nColher análises com indicação «Via Verde AVC»\nContactar a Imagiologia para TAC urgente\nCateterizar 2 veias periféricas (de preferência no mesmo membro)\nValidar/estimar o peso e administrar trombólise conforme prescrição médica\nAcompanhar o doente sob monitorização (médico e enfermeiro)",
+    precaucoes:"Tempo é cérebro — minimizar os tempos até à TAC e ao tratamento\nEvitar algaliação (se imprescindível, técnica cuidadosa)\nAtenção a critérios que contraindicam/complicam a trombólise"
+  },
+  "CQS_PRO_071/01": {
+    objetivo:"Estabelecer a avaliação sistemática do risco de queda, as medidas preventivas, a atuação na queda e o respetivo registo/notificação, reduzindo o dano evitável.",
+    indicacoes:"Doentes adultos em internamento, ambulatório e Cuidados de Saúde Primários com prestação de cuidados presenciais",
+    material:"Escala de Quedas de Morse\nMaterial de sinalização do risco de queda",
+    passos:"Avaliar o risco de queda com a Escala de Morse na admissão\nClassificar o nível de risco (baixo / alto)\nImplementar precauções básicas de prevenção de quedas\nNos doentes de alto risco, acrescentar medidas específicas e sinalizar\nEducar o doente/cuidador sobre fatores de risco e precauções\nReavaliar periodicamente e após alteração do estado clínico\nEm caso de queda: prestar cuidados, registar e notificar como incidente",
+    precaucoes:"Quedas fisiológicas imprevistas (ex.: convulsão/síncope) são difíceis de prevenir\nReavaliar sempre que muda a medicação, a mobilidade ou o estado de consciência"
+  },
+  "EGR_PRO_003/00": {
+    objetivo:"Descrever as ações de análise de um risco identificado no serviço, com a finalidade de o reduzir a um mínimo aceitável.",
+    indicacoes:"Sempre que seja identificado um risco para a segurança do doente numa UF/Serviço",
+    material:"Ferramenta de Análise de Risco (Anexo I)\nMatriz de Nível de Deficiência, Exposição e Consequência",
+    passos:"Identificar o(s) perigo(s)\nDefinir o risco a analisar\nAtribuir o nível de risco com a ferramenta (deficiência, exposição, consequência)\nDefinir o nível de intervenção\nElaborar plano de ação com medidas corretivas e preventivas\nDefinir responsáveis e prazos\nValidar o Plano de Prevenção de Riscos (EGR)\nDivulgar o plano a todos os profissionais\nMonitorizar a implementação das medidas",
+    precaucoes:"Medidas focadas no sistema e não no profissional\nReavaliar o risco após implementação das medidas"
+  },
+  "SU_IDT_001/00": {
+    objetivo:"Estabelecer a atuação em caso de falha (programada ou não) dos sistemas de informação no SU, sem comprometer o atendimento.",
+    indicacoes:"Falha programada ou não programada dos sistemas de informação no Serviço de Urgência",
+    material:"Formulários em papel (ex.: requisição de análises IMP_010/00)\nEtiquetas codificadas fornecidas pelo laboratório",
+    passos:"Manter o atendimento dos doentes sem interrupção\nRegistar a informação clínica em papel, com identificação do profissional e data/hora\nRequisitar análises em formulário de papel; identificar amostras com etiquetas do laboratório\nRequisitar imagiologia em papel; visualizar as imagens presencialmente no local\nNa falha programada: 60 min antes, imprimir o processo de enfermagem dos internados\nRepor os registos nos sistemas após reposição do serviço",
+    precaucoes:"Todo o registo em papel tem de ter identificação do profissional e data/hora\nA identificação de amostras é sempre feita com etiqueta codificada do laboratório"
+  },
+  "SSST_PRO_001/01": {
+    objetivo:"Definir a atuação dos profissionais em caso de acidente de trabalho, incidente ou acontecimento perigoso.",
+    indicacoes:"Acidente de trabalho (incluindo no trajeto), incidente ou acontecimento perigoso com profissionais",
+    material:"Impresso de participação de acidente de trabalho",
+    passos:"Garantir o socorro, se necessário, recorrendo ao Serviço de Urgência\nParticipar verbalmente o acidente à chefia/responsável\nFormalizar a participação por escrito dentro do prazo definido\nNas exposições a sangue/material biológico, seguir o protocolo de exposição\nEncaminhar para a Saúde Ocupacional",
+    precaucoes:"Exposições mais graves: maior volume de sangue, lesões profundas, sangue visível no dispositivo, agulhas de vaso ou de grosso calibre\nUso e eliminação segura de cortantes/perfurantes\nCumprir o prazo de comunicação"
+  },
+  "PRO_009/00": {
+    objetivo:"Descrever a inserção, manutenção e remoção do dreno torácico com práticas seguras, prevenindo infeções associadas.",
+    indicacoes:"Pneumotórax\nDerrame pleural, incluindo empiema\nHemotórax\nHidropneumotórax\nQuilotórax",
+    material:"Agulhas (diluição, intradérmica, intramuscular) e lidocaína 1-2%\nBisturi nº24, fio de seda 0 ou 2/0, transfer\nDreno torácico (calibre conforme indicação médica)\nSistema de drenagem torácica; NaCl 0,9% ou água destilada para o selo de água\nMaterial de tricotomia (se aplicável); aspiração ativa (ex.: Medela®) se necessário",
+    passos:"Explicar o procedimento ao doente e pedir colaboração\nHigienizar as mãos\nPreparar e dispor o material esterilizado\nPreparar o sistema de drenagem: encher o selo de água com NaCl/água destilada\nColaborar com o médico na inserção, mantendo vigilância do doente\nFixar o dreno e o sistema; manter abaixo do nível do tórax e hermético\nVigiar oscilação/borbulhar, débito e penso; registar",
+    precaucoes:"Manter o sistema hermético e sempre abaixo do nível do tórax\nAssepsia rigorosa para prevenir infeção\nVigiar sinais de complicação e o funcionamento do selo de água"
+  },
+  "CQS_PRO_078/00": {
+    objetivo:"Uniformizar a identificação inequívoca do doente, prevenindo erros associados a troca de identidade.",
+    indicacoes:"Todas as UF/Serviços com contacto direto ou indireto com o doente\nPulseira obrigatória em SU, internamento, UCA e serviços com procedimentos de risco elevado",
+    material:"Pulseira identificativa legível e resistente\nEtiquetas codificadas",
+    passos:"No registo administrativo, confirmar e atualizar identificação, morada e contactos\nEm caso de dúvida, não finalizar o registo sem validação\nColocar a pulseira na admissão e explicar a sua finalidade ao doente\nGarantir na pulseira: nome completo, data de nascimento e nº de processo/utente\nConfirmar a identidade à cabeceira antes de cada ato (pelo menos 2 identificadores)\nUsar medidas alternativas quando o doente não pode usar pulseira",
+    precaucoes:"Confirmar sempre com 2 identificadores antes de atos e de medicação\nSubstituir a pulseira se ilegível, danificada ou em membro com procedimento invasivo"
+  },
+  "EGR_PRO_001/00": {
+    objetivo:"Promover uma cultura de segurança, documentar e analisar incidentes e agir precocemente sobre as falhas.",
+    indicacoes:"Qualquer incidente de segurança do doente (com ou sem dano), incluindo quase-eventos",
+    material:"Plataforma NOTIFICA – Segurança do Doente\nPlataforma de gestão documental (GooPortal)",
+    passos:"Notificar o incidente logo que detetado\nO GLR/GGI analisa o incidente e propõe medidas corretivas/preventivas\nImplementar e monitorizar as medidas\nO GLN receciona e valida a notificação na plataforma NOTIFICA\nA EGR valida o tratamento e reporta trimestralmente ao Conselho de Administração",
+    precaucoes:"Sistema não punitivo — sem culpabilização nem apuramento de responsabilidades\nMedidas focadas no sistema e não no profissional"
+  },
+  "SF_PRO_001/00": {
+    objetivo:"Garantir práticas seguras com Medicamentos de Alta Vigilância (MAV) em todo o circuito do medicamento e controlar o erro associado.",
+    indicacoes:"Medicamentos de Alta Vigilância (MAV) e de Alerta Máximo (MAM)\nMedicamentos LASA (nome/aspeto semelhante)",
+    material:"Sinalética e identificação específica de MAV\nListagem institucional de MAV/MAM",
+    passos:"Identificar e sinalizar os MAV em todas as fases (armazenamento, prescrição, preparação, administração)\nAplicar dupla verificação dos critérios mínimos (doente, medicamento, dose, via, hora)\nEm pedidos verbais de emergência: soletrar DCI, forma, dose e posologia; repetir de volta ao prescritor\nArmazenar de forma diferenciada e segura\nMonitorizar o doente após a administração\nNotificar incidentes/erros (EGR_PRO_001/00)",
+    precaucoes:"Verbalizar os dígitos da dose individualmente\nAtenção especial aos medicamentos LASA\nEm caso de dúvida, consultar os Serviços Farmacêuticos"
+  },
+  "PRO_001/00": {
+    objetivo:"Normalizar a abordagem clínica à anafilaxia, reduzindo a variabilidade entre profissionais.",
+    indicacoes:"Reação aguda de hipersensibilidade sistémica, súbita, com compromisso de 2 ou mais sistemas (via aérea / respiratório / circulatório)\nHipotensão após exposição a alergénio",
+    material:"Adrenalina IM\nOxigénio e material de via aérea e de reanimação\nFluidoterapia EV; anti-histamínico e corticoide (2.ª linha)\nTubos para doseamento de triptase sérica",
+    passos:"Reconhecer a anafilaxia (avaliação ABC + exposição a alergénio)\nPedir ajuda e seguir o fluxograma de atuação\nAdministrar adrenalina IM precocemente (1.ª linha)\nPosicionar o doente, administrar O2 e fluidos EV\nMonitorizar ABC e sinais vitais\nColher triptase: amostra inicial logo que possível (idealmente 3 amostras seriadas)\nVigiar pelo menos 6h num local com capacidade para tratar compromisso grave do ABC",
+    precaucoes:"A adrenalina IM é o tratamento de 1.ª linha — não atrasar\nRisco de reação bifásica — manter vigilância\nÀ alta: ensino, plano e referenciação (ex.: dispositivo de adrenalina)"
+  },
+  "PRO_008/00": {
+    objetivo:"Descrever e uniformizar a colheita de sangue para hemoculturas, com assepsia rigorosa e boas práticas.",
+    indicacoes:"Febre maior ou igual a 38 ºC ou hipotermia\nSuspeita de bacteriemia/sépsis conforme a situação clínica\nNÃO indicada: celulite leve, pneumonia sem gravidade, ITU não complicada, febre isolada sem sinais sistémicos",
+    material:"Frascos de hemocultura (aeróbio/anaeróbio)\nAntissético de base alcoólica (não usar compostos iodados na borracha)\nMaterial de punção, garrote e luvas",
+    passos:"Confirmar a requisição e a validade dos frascos\nExplicar o procedimento ao doente\nHigienizar as mãos e manter assepsia rigorosa\nDesinfetar a pele e a borracha dos frascos (remover a tampa só na inoculação)\n1ª punção (braço esquerdo) e 2ª punção (braço direito)\nQuando se fazem outros exames, inocular primeiro o frasco de hemocultura\nRespeitar o volume por frasco (ex.: BacT/Alert 10 mL)\nIdentificar as amostras e enviar com informação clínica",
+    precaucoes:"Assepsia rigorosa para evitar contaminação e falsos positivos\n2 punções em locais diferentes; respeitar os volumes\nNão usar compostos iodados para desinfetar a borracha do frasco"
+  },
+  "CQS_PRO_079/00": {
+    objetivo:"Padronizar a validação, preparação, administração, monitorização e registo da terapêutica, prevenindo incidentes e dano evitável.",
+    indicacoes:"Todos os profissionais que preparam e administram medicamentos",
+    material:"Equipamento de proteção individual (quando aplicável)\nSistemas seguros (ENFit / NRFit)\nSolventes unidose adequados conforme RCM",
+    passos:"Validar a prescrição: confirmar dados do doente, interações e contraindicações\nIdentificar e assinalar MAV; verificar necessidade de refrigeração\nValidar aspetos técnicos (compatibilidade, diluição, estabilidade)\nPreparar com higiene das mãos e assepsia; dupla verificação dos cálculos\nConfirmar a identificação do doente (CQS_PRO_078/00) e as alergias\nAdministrar cumprindo os «certos» (doente, medicamento, dose, via, hora)\nMonitorizar os efeitos e registar",
+    precaucoes:"Dupla verificação sempre que há cálculos ou MAV\nNão reutilizar seringas; minimizar interrupções\nMultidose: identificar com data de abertura e cumprir a validade"
+  },
+  "SU_REG_001/00": {
+    objetivo:"Estabelecer as normas de funcionamento do Sistema de Triagem de Prioridades segundo a Triagem de Manchester no SU.",
+    indicacoes:"Todos os utentes admitidos no Serviço de Urgência",
+    material:"Sistema/aplicação de Triagem de Manchester\nFluxogramas e discriminadores de Manchester",
+    passos:"Chamar o utente da sala de espera para a sala de triagem\nSelecionar o fluxograma adequado à queixa\nAvaliar os discriminadores e os sinais vitais\nAtribuir a cor/prioridade (Vermelho, Laranja, Amarelo, Verde, Azul)\nEncaminhar conforme a prioridade; ativar vias verdes quando aplicável",
+    precaucoes:"Só pode triar quem tem o Curso de Triagem de Manchester aprovado pelo Grupo Português de Triagem\nCor branca para situações fora da hierarquização (Despacho 4835-A/2016)\nReavaliar o utente em espera sempre que necessário"
+  },
+  "SU_PTC_002/00": {
+    objetivo:"Uniformizar a abordagem ao caso suspeito de Via Verde Coronária, aumentando a reperfusão precoce no EAM com supra-ST (EAMcsST).",
+    indicacoes:"Dor torácica não traumática e/ou dor epigástrica\nSuspeita de Enfarte Agudo do Miocárdio com supra-ST",
+    material:"Eletrocardiógrafo (ECG de 12 derivações)\nMonitorização e material de emergência\nAcesso venoso e colheita analítica",
+    passos:"Na triagem, perante dor torácica/epigástrica, encaminhar para a Sala de Emergência\nRealizar ECG de 12 derivações precocemente (1º contacto até ao ECG menor ou igual a 10 min)\nContactar o médico e o Técnico de Cardiopneumologia\nMonitorizar, cateterizar acesso venoso e colher análises com indicação «Via Verde Coronária»\nAcionar transporte urgente para a Cardiologia de intervenção de referência (Hospital de Braga)\nSe a fibrinólise for a opção de eleição, administrar e depois encaminhar",
+    precaucoes:"O tempo porta-ECG menor ou igual a 10 min é crítico\nPercurso em dias úteis 8h30–19h30 conforme o procedimento; fora disso, seguir indicações\nVigilância contínua até ao transporte"
+  },
+  "SMI5_IT_001/00": {
+    objetivo:"Uniformizar a avaliação e os cuidados à boca do doente hospitalizado, detetando precocemente alterações da mucosa oral.",
+    indicacoes:"Todos os doentes hospitalizados; avaliação da mucosa oral de 48 em 48h (turno da manhã)",
+    material:"Espátula, esponjas de higiene oral ou escova de pelos macios\nPasta dentífrica com 1000–1500 ppm de flúor (individual)\nToalha/celulose e solução para limpeza da mucosa",
+    passos:"Higienizar as mãos e preparar o material\nExplicar o procedimento e posicionar o utente\nColocar toalha/celulose sobre o tórax\nEscovar dentes e língua com escova macia ou esponja\nLimpar gengivas, língua e face interna com espátula embebida em solução\nAvaliar a boca (mucosa, lábios, língua): cor, hidratação e lesões\nRecolher o material e higienizar as mãos\nRegistar no SClínico (avaliação inicial e intervenções)",
+    precaucoes:"Material de higiene oral individual\nDespistar manchas esbranquiçadas/avermelhadas e placas\nEnsinar o doente/prestador sobre higiene oral e complicações"
+  },
+  "SU_PTC_001/00": {
+    objetivo:"Regular a atuação da Equipa de Emergência Médica Intra-Hospitalar (EEMI) no atendimento ao doente crítico.",
+    indicacoes:"Ativação perante doente crítico ou deterioração intra-hospitalar",
+    material:"Saco/mochila com o material para o Doente Crítico\nMonitor/desfibrilhador portátil\nBala de O2 (B3) e aspirador portátil (acondicionados no SU)",
+    passos:"Verificação diária da funcionalidade do monitor/desfibrilhador (turno da manhã)\nVerificação semanal do saco de material (manhã de sábado)\nNa ativação, o médico comunica com o enfermeiro\nRecolher e transportar o material até ao local da ocorrência, com distribuição de tarefas\nPrestar cuidados ao doente crítico\nRepor de imediato o material consumido",
+    precaucoes:"Verificar diariamente o desfibrilhador (teste de funcionalidade)\nRepor sempre o material consumido após cada ativação\nConsultar a checklist do material (Anexo II)"
+  }
+};
+function temResumo(p){ return p && p.resumo && RESUMO_SECOES.some(s=>(p.resumo[s.k]||"").trim()); }
+
+/* ============================================================
+   ESTADO / PERSISTÊNCIA
+   ============================================================ */
+const LS_KEY = "su_procedimentos_v2";
+const SS_KEY = "su_sessao_v1";
+const USERS_KEY = "su_utilizadores_v1";
+
+function seedClone(){
+  return SEED.map((p,i)=>({
+    id: "P"+(i+1),
+    ...p,
+    resumo: RESUMOS[p.codigo] ? {...RESUMOS[p.codigo]} : null,
+    atualizado_por: "Importação inicial",
+    atualizado_em: p.data_revisao
+  }));
+}
+function loadDB(){
+  try{ const raw = localStorage.getItem(LS_KEY); if(raw) return JSON.parse(raw); }catch(e){}
+  const fresh = seedClone(); saveDB(fresh); return fresh;
+}
+function saveDB(db){ try{ localStorage.setItem(LS_KEY, JSON.stringify(db)); }catch(e){} }
+function resetDB(){ const fresh = seedClone(); saveDB(fresh); return fresh; }
+
+/* Utilizadores (persistidos localmente — sincronizam quando ligarmos o backend) */
+function loadUsers(){
+  try{ const raw=localStorage.getItem(USERS_KEY); if(raw){ const u=JSON.parse(raw); if(Array.isArray(u)&&u.length) return u; } }catch(e){}
+  const fresh = DEFAULT_USERS.map(u=>({...u})); saveUsers(fresh); return fresh;
+}
+function saveUsers(u){ try{ localStorage.setItem(USERS_KEY, JSON.stringify(u)); }catch(e){} }
+function resetUsers(){ const fresh = DEFAULT_USERS.map(u=>({...u})); saveUsers(fresh); return fresh; }
+
+let DB = loadDB();
+let USERS = loadUsers();
+let SESSION = null;
+let VIEW = {name:"list", id:null};
+let FILTERS = {q:"", categoria:"Todas", estado:"Vigente"}; // estado só usado pelo gestor
+
+/* ============================================================
+   NUVEM (Supabase) — contas reais + sincronização em tempo real
+   Tudo protegido por CLOUD: se não houver configuração, a app
+   continua a funcionar em modo LOCAL (localStorage), como antes.
+   ============================================================ */
+const CFG = window.SU_CONFIG || {};
+const CLOUD = !!(CFG.SUPABASE_URL && CFG.SUPABASE_ANON_KEY && window.supabase);
+const CLOUD_CACHE = "su_cloud_cache_v1";
+let sb = CLOUD ? window.supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY) : null;
+let _rtChannel = null;
+let LOGIN_MODE = "login"; // "login" | "signup"
+
+const PROC_COLS = ["id","codigo","titulo","categoria","area","versao","data_revisao","estado","link_documento","palavras_chave","responsaveis","resumo","atualizado_por","atualizado_em"];
+function procToRow(p){
+  const r = {};
+  PROC_COLS.forEach(k => { r[k] = (p[k] !== undefined ? p[k] : null); });
+  if(!Array.isArray(r.palavras_chave)) r.palavras_chave = [];
+  if(!r.data_revisao) r.data_revisao = null;
+  return r;
+}
+function seedCloneCloud(){
+  return SEED.map((p,i)=>({
+    id:"P"+(i+1), ...p,
+    resumo: RESUMOS[p.codigo] ? {...RESUMOS[p.codigo]} : null,
+    atualizado_por:"Importação inicial", atualizado_em:new Date().toISOString()
+  }));
+}
+
+async function loadCloudData(){
+  try{
+    const { data, error } = await sb.from("procedimentos").select("*");
+    if(error) throw error;
+    DB = (data||[]).map(r => ({...r, palavras_chave: r.palavras_chave || []}));
+    localStorage.setItem(CLOUD_CACHE, JSON.stringify(DB));
+    return true;
+  }catch(e){
+    try{ DB = JSON.parse(localStorage.getItem(CLOUD_CACHE) || "[]"); }catch(_){ DB = []; }
+    return false;
+  }
+}
+function subscribeRealtime(){
+  if(_rtChannel){ try{ sb.removeChannel(_rtChannel); }catch(_){} _rtChannel=null; }
+  _rtChannel = sb.channel("rt-proc")
+    .on("postgres_changes", { event:"*", schema:"public", table:"procedimentos" }, async ()=>{
+      await loadCloudData();
+      if(SESSION && (VIEW.name==="list" || VIEW.name==="detail")) renderApp();
+    })
+    .subscribe();
+}
+async function fetchMyProfile(user){
+  try{
+    const { data } = await sb.from("profiles").select("*").eq("id", user.id).maybeSingle();
+    if(data) return data;
+  }catch(_){}
+  return { id:user.id, email:user.email, nome:user.email, role:"enfermeiro" };
+}
+async function onSignedIn(session){
+  const prof = await fetchMyProfile(session.user);
+  SESSION = { id:session.user.id, email:prof.email||session.user.email, nome:prof.nome||prof.email||session.user.email, role:prof.role||"enfermeiro" };
+  await loadCloudData();
+  subscribeRealtime();
+  FILTERS = {q:"",categoria:"Todas",estado:"Vigente"};
+  VIEW = {name:"list",id:null};
+  renderApp();
+}
+async function bootCloud(){
+  renderApp(); // mostra o login enquanto verifica a sessão
+  try{
+    const { data:{ session } } = await sb.auth.getSession();
+    if(session) await onSignedIn(session);
+  }catch(e){ /* offline */ }
+  sb.auth.onAuthStateChange((event, session)=>{
+    if(event==="SIGNED_IN" && session && !SESSION) onSignedIn(session);
+    if(event==="SIGNED_OUT"){ SESSION=null; if(_rtChannel){ try{sb.removeChannel(_rtChannel);}catch(_){} _rtChannel=null; } VIEW={name:"list",id:null}; renderApp(); }
+  });
+}
+
+/* Escritas do gestor na nuvem (a sincronização em tempo real propaga a todos) */
+async function cloudSaveProc(proc, isNew){
+  const row = procToRow(proc);
+  if(isNew){ const { error } = await sb.from("procedimentos").insert(row); if(error) throw error; }
+  else { const { error } = await sb.from("procedimentos").update(row).eq("id", row.id); if(error) throw error; }
+}
+async function cloudPatchProc(id, patch){
+  const { error } = await sb.from("procedimentos").update(patch).eq("id", id); if(error) throw error;
+}
+async function cloudDeleteProc(id){ const { error } = await sb.from("procedimentos").delete().eq("id", id); if(error) throw error; }
+async function cloudSeed(){ const { error } = await sb.from("procedimentos").insert(seedCloneCloud().map(procToRow)); if(error) throw error; }
+
+/* Perfis / contas (gestor) */
+async function cloudListProfiles(){ const { data, error } = await sb.from("profiles").select("*"); if(error) throw error; return data||[]; }
+async function cloudSetRole(id, role){ const { error } = await sb.from("profiles").update({role}).eq("id", id); if(error) throw error; }
+async function cloudDeleteProfile(id){ const { error } = await sb.from("profiles").delete().eq("id", id); if(error) throw error; }
+
+function traduzAuthErro(err){
+  const m = (err && (err.message||err.error_description||"")) + "";
+  if(/Invalid login/i.test(m)) return "Email ou palavra-passe incorretos.";
+  if(/Email not confirmed/i.test(m)) return "Email ainda não confirmado. Verifique a sua caixa de correio.";
+  if(/already registered|already exists/i.test(m)) return "Já existe uma conta com este email.";
+  if(/Password should be at least/i.test(m)) return "A palavra-passe deve ter pelo menos 6 caracteres.";
+  if(/rate limit|too many/i.test(m)) return "Demasiadas tentativas. Aguarde um momento.";
+  return m || "Ocorreu um erro. Tente novamente.";
+}
+function setLoginMode(mode){
+  LOGIN_MODE = mode;
+  const nomeWrap = $("#nomeField"); const toggle = $("#authToggle"); const submit = $("#loginSubmit");
+  if(nomeWrap) nomeWrap.classList.toggle("hidden", mode!=="signup");
+  if(submit) submit.textContent = mode==="signup" ? "Criar conta" : "Entrar";
+  if(toggle) toggle.innerHTML = mode==="signup"
+    ? "Já tem conta? <b>Iniciar sessão</b>"
+    : "Primeira vez? <b>Criar conta</b>";
+  const err=$("#loginErr"); if(err) err.classList.add("hidden");
+}
+function setupLoginUI(){
+  // Em modo nuvem: esconder contas demo, mostrar alternância Entrar/Criar conta.
+  if(!CLOUD) return;
+  const demo = document.querySelector(".demo-accounts"); if(demo) demo.classList.add("hidden");
+  const t = $("#authToggle"); if(t) t.classList.remove("hidden");
+  setLoginMode("login");
+}
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const el = (tag, cls, html) => { const n=document.createElement(tag); if(cls)n.className=cls; if(html!=null)n.innerHTML=html; return n; };
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function fmtDate(iso){
+  if(!iso) return "—";
+  const [y,m,d] = iso.split("-");
+  if(!d) return iso;
+  return `${d}-${m}-${y}`;
+}
+function fmtDateTime(iso){
+  if(!iso) return "—";
+  if(iso.length<=10) return fmtDate(iso);
+  const dt = new Date(iso);
+  if(isNaN(dt)) return fmtDate(iso);
+  return dt.toLocaleString("pt-PT",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
+}
+function monthsSince(iso){
+  if(!iso) return Infinity;
+  const d = new Date(iso); if(isNaN(d)) return Infinity;
+  const now = new Date();
+  return (now.getFullYear()-d.getFullYear())*12 + (now.getMonth()-d.getMonth()) - (now.getDate()<d.getDate()?1:0);
+}
+const isOld = p => monthsSince(p.data_revisao) >= 12;
+const estadoClass = e => "estado-"+e.replace(/\s+/g,"");
+
+function toast(msg){
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove("show"), 2600);
+}
+
+// Aviso quando a app é aberta por duplo-clique (file://): browsers bloqueiam
+// a abertura de PDF locais. Recomenda o atalho/servidor.
+function fileProtocolNotice(){
+  if(location.protocol!=="file:") return null;
+  const n = el("div","file-warn");
+  n.innerHTML = ICON.alert + `<span><b>App aberta por duplo-clique (file://).</b> Neste modo o browser pode bloquear a abertura dos PDF (erro ao abrir o documento). Para abrir sempre, use o atalho <code>Abrir Procedimentos.command</code> (duplo-clique) ou corra um servidor local — ver README.</span>`;
+  return n;
+}
+
+const ICON = {
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
+  doc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg>',
+  open:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>',
+  alert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+  archive:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/><path d="M10 12h4"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>',
+  info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>',
+  empty:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>',
+  users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  key:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.6 7.6a5 5 0 1 0-1.4 1.4l3.5 3.5L16 16l2 2 3-3-7.6-7.4z"/></svg>',
+  shield:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg>'
+};
+
+/* ============================================================
+   AUTENTICAÇÃO
+   ============================================================ */
+function restoreSession(){
+  try{ const raw = sessionStorage.getItem(SS_KEY); if(raw) SESSION = JSON.parse(raw); }catch(e){}
+}
+function login(email, pass){
+  const u = USERS.find(u=>u.email.toLowerCase()===email.trim().toLowerCase() && u.pass===pass);
+  if(!u) return false;
+  SESSION = {email:u.email, nome:u.nome, role:u.role};
+  sessionStorage.setItem(SS_KEY, JSON.stringify(SESSION));
+  return true;
+}
+function logout(){
+  if(CLOUD && sb){ sb.auth.signOut(); return; } // onAuthStateChange repõe o ecrã
+  SESSION=null; sessionStorage.removeItem(SS_KEY); FILTERS={q:"",categoria:"Todas",estado:"Vigente"}; VIEW={name:"list",id:null}; renderApp();
+}
+const isGestor = () => SESSION && SESSION.role==="gestor";
+
+/* ============================================================
+   FILTRAGEM
+   ============================================================ */
+function visibleProcedures(){
+  let list = DB.slice();
+  // enfermeiro: apenas vigentes
+  if(!isGestor()){
+    list = list.filter(p=>p.estado==="Vigente");
+  } else if(FILTERS.estado!=="Todos"){
+    list = list.filter(p=>p.estado===FILTERS.estado);
+  }
+  if(FILTERS.categoria!=="Todas"){
+    list = list.filter(p=>p.categoria===FILTERS.categoria);
+  }
+  const q = FILTERS.q.trim().toLowerCase();
+  if(q){
+    list = list.filter(p=>{
+      const hay = [p.titulo, p.codigo, p.area, (p.palavras_chave||[]).join(" "), p.responsaveis||""].join(" ").toLowerCase();
+      return hay.includes(q);
+    });
+  }
+  list.sort((a,b)=> a.titulo.localeCompare(b.titulo,"pt"));
+  return list;
+}
+
+/* ============================================================
+   RENDER — APP SHELL
+   ============================================================ */
+function renderApp(){
+  if(!SESSION){
+    $("#loginView").classList.remove("hidden");
+    $("#appView").classList.add("hidden");
+    return;
+  }
+  $("#loginView").classList.add("hidden");
+  $("#appView").classList.remove("hidden");
+  $("#userRole").textContent = isGestor() ? "Gestor" : "Enfermeiro";
+  $("#footMeta").textContent = `${DB.length} procedimentos · sessão: ${SESSION.nome}`;
+  if(VIEW.name==="detail") renderDetail(VIEW.id);
+  else if(VIEW.name==="form") renderForm(VIEW.id);
+  else if(VIEW.name==="users" && isGestor()) renderUsers();
+  else renderList();
+}
+
+/* ============================================================
+   RENDER — LISTA
+   ============================================================ */
+function renderList(){
+  const main = $("#mainContent"); main.innerHTML="";
+
+  const fpn = fileProtocolNotice(); if(fpn) main.appendChild(fpn);
+
+  // toolbar
+  const tb = el("div","toolbar");
+
+  // search
+  const sb = el("div","search-box");
+  sb.innerHTML = ICON.search +
+    `<input type="search" id="searchInput" placeholder="Pesquisar título, código, palavra-chave…" value="${esc(FILTERS.q)}">`+
+    (FILTERS.q?`<button class="clear" id="clearSearch" aria-label="Limpar">×</button>`:"");
+  tb.appendChild(sb);
+
+  // category chips
+  const chips = el("div","chips");
+  const baseList = isGestor()
+    ? (FILTERS.estado==="Todos"?DB:DB.filter(p=>p.estado===FILTERS.estado))
+    : DB.filter(p=>p.estado==="Vigente");
+  const catCount = c => c==="Todas"? baseList.length : baseList.filter(p=>p.categoria===c).length;
+  ["Todas",...CATEGORIAS].forEach(c=>{
+    const n = catCount(c);
+    if(c!=="Todas" && n===0) return; // esconder categorias vazias
+    const b = el("button","chip"+(FILTERS.categoria===c?" active":""));
+    b.innerHTML = esc(c)+`<span class="count">${n}</span>`;
+    b.onclick = ()=>{ FILTERS.categoria=c; renderList(); };
+    chips.appendChild(b);
+  });
+  tb.appendChild(chips);
+
+  // meta row: count + (gestor) state filter
+  const metaRow = el("div","meta-row");
+  if(isGestor()){
+    const sf = el("div","state-filter");
+    const seg = el("div","seg");
+    ["Todos",...ESTADOS].forEach(s=>{
+      const b = el("button",FILTERS.estado===s?"active":"",esc(s));
+      b.onclick=()=>{ FILTERS.estado=s; renderList(); };
+      seg.appendChild(b);
+    });
+    sf.appendChild(seg);
+    metaRow.appendChild(sf);
+  } else {
+    metaRow.appendChild(el("span","result-count","A mostrar procedimentos vigentes"));
+  }
+  tb.appendChild(metaRow);
+  main.appendChild(tb);
+
+  // gestor: alerta +12 meses + botão adicionar
+  if(isGestor()){
+    const oldOnes = DB.filter(p=>p.estado!=="Obsoleto" && isOld(p));
+    if(oldOnes.length){
+      const ab = el("div","alert-banner");
+      ab.innerHTML = ICON.alert +
+        `<span><b>${oldOnes.length}</b> procedimento(s) sem revisão há mais de 12 meses.</span>`+
+        `<button id="showOld">Ver</button>`;
+      main.appendChild(ab);
+      ab.querySelector("#showOld").onclick=()=>{ FILTERS.q=""; FILTERS.categoria="Todas"; FILTERS.estado="Todos"; renderList();
+        setTimeout(()=>document.querySelector(".card.flag-old")?.scrollIntoView({behavior:"smooth",block:"center"}),60); };
+    }
+    const addBar = el("div","meta-row");
+    const addBtn = el("button","btn small"); addBtn.innerHTML = ICON.plus+"Adicionar procedimento";
+    addBtn.onclick=()=>{ VIEW={name:"form",id:null}; renderApp(); };
+    addBar.appendChild(addBtn);
+    const usersBtn = el("button","btn small secondary"); usersBtn.innerHTML = ICON.users+"Gerir contas";
+    usersBtn.onclick=()=>{ VIEW={name:"users"}; renderApp(); window.scrollTo(0,0); };
+    addBar.appendChild(usersBtn);
+    if(CLOUD){
+      if(DB.length===0){
+        const seedBtn = el("button","btn small secondary"); seedBtn.innerHTML = ICON.plus+"Carregar dados de exemplo";
+        seedBtn.onclick=()=>confirmModal("Carregar dados de exemplo?","Serão enviados os 18 procedimentos iniciais para a nuvem (visíveis para toda a equipa).","Carregar",async ()=>{
+          try{ await cloudSeed(); await loadCloudData(); toast("18 procedimentos carregados"); renderApp(); }
+          catch(e){ toast("Erro ao carregar: "+traduzAuthErro(e)); }
+        });
+        addBar.appendChild(seedBtn);
+      }
+    } else {
+      const resetBtn = el("button","btn small secondary","Repor dados de exemplo");
+      resetBtn.onclick=()=>confirmModal("Repor dados de exemplo?","Todas as alterações locais serão apagadas e os 18 procedimentos originais restaurados.","Repor",()=>{
+        DB = resetDB(); toast("Dados de exemplo repostos"); renderApp();
+      });
+      addBar.appendChild(resetBtn);
+    }
+    main.appendChild(addBar);
+  }
+
+  // results
+  const list = visibleProcedures();
+  const countLine = el("div","result-count");
+  countLine.style.margin="0 2px 10px";
+  countLine.textContent = `${list.length} resultado${list.length===1?"":"s"}`;
+  main.appendChild(countLine);
+
+  if(!list.length){
+    const e = el("div","empty"); e.innerHTML = ICON.empty+"<p>Nenhum procedimento corresponde à pesquisa.</p>";
+    main.appendChild(e);
+  } else {
+    const grid = el("div","cards");
+    list.forEach(p=>grid.appendChild(cardEl(p)));
+    main.appendChild(grid);
+  }
+
+  // wire search
+  const si = $("#searchInput");
+  if(si){
+    si.oninput = e=>{ FILTERS.q=e.target.value; debouncedSearch(); };
+    si.onsearch = ()=>renderList();
+  }
+  const cs = $("#clearSearch");
+  if(cs) cs.onclick=()=>{ FILTERS.q=""; renderList(); $("#searchInput")?.focus(); };
+}
+
+let _searchT;
+function debouncedSearch(){
+  clearTimeout(_searchT);
+  _searchT = setTimeout(()=>{
+    const pos = document.activeElement===$("#searchInput");
+    renderList();
+    if(pos){ const i=$("#searchInput"); i.focus(); i.setSelectionRange(i.value.length,i.value.length); }
+  }, 180);
+}
+
+function cardEl(p){
+  const old = isGestor() && p.estado!=="Obsoleto" && isOld(p);
+  const c = el("button","card"+(old?" flag-old":""));
+  c.innerHTML =
+    `<div class="code">${esc(p.codigo)}</div>`+
+    `<h3>${esc(p.titulo)}</h3>`+
+    `<div class="area">${esc(p.area||"")}</div>`+
+    `<div class="badges">`+
+      `<span class="badge cat">${esc(p.categoria)}</span>`+
+      `<span class="badge ${estadoClass(p.estado)}">${esc(p.estado)}</span>`+
+      (old?`<span class="badge old">⚠ +12 meses</span>`:"")+
+    `</div>`+
+    `<div class="foot"><span class="ver">v${esc(p.versao)}</span><span>Rev. ${fmtDate(p.data_revisao)}</span></div>`;
+  c.onclick=()=>{ VIEW={name:"detail",id:p.id}; renderApp(); window.scrollTo(0,0); };
+  return c;
+}
+
+/* Abrir o documento: nuvem -> link assinado temporário do Storage (só autenticados);
+   local -> ficheiro relativo na pasta. */
+function openDocument(p){
+  if(CLOUD){
+    const w = window.open("", "_blank"); // abrir já, no gesto do utilizador (evita bloqueio de pop-ups)
+    sb.storage.from("documentos").createSignedUrl(p.link_documento, 120).then(({data, error})=>{
+      if(error || !data){ if(w) w.close(); toast("Documento ainda não carregado para o Storage."); return; }
+      if(w) w.location = data.signedUrl; else window.location.href = data.signedUrl;
+    }).catch(()=>{ if(w) w.close(); toast("Não foi possível abrir o documento."); });
+  } else {
+    window.open(encodeURI(p.link_documento), "_blank", "noopener");
+  }
+}
+function docButtonEl(p, secondary){
+  const b = el("button", "btn doc-btn"+(secondary?" secondary":""));
+  b.innerHTML = ICON.open+"Abrir documento oficial (PDF)";
+  b.onclick = ()=>openDocument(p);
+  return b;
+}
+
+/* ============================================================
+   RENDER — DETALHE
+   ============================================================ */
+function renderDetail(id){
+  const p = DB.find(x=>x.id===id);
+  const main = $("#mainContent"); main.innerHTML="";
+  if(!p){ VIEW={name:"list"}; renderList(); return; }
+
+  const back = el("button","back-btn"); back.innerHTML=ICON.back+"Voltar à lista";
+  back.onclick=()=>{ VIEW={name:"list"}; renderApp(); };
+  main.appendChild(back);
+
+  const fpn = fileProtocolNotice(); if(fpn) main.appendChild(fpn);
+
+  const d = el("div","detail");
+  const old = isGestor() && p.estado!=="Obsoleto" && isOld(p);
+  const present = PDFS_PRESENTES.has(p.link_documento);
+
+  let html =
+    `<div class="code">${esc(p.codigo)}</div>`+
+    `<h2>${esc(p.titulo)}</h2>`+
+    `<div class="badges">`+
+      `<span class="badge cat">${esc(p.categoria)}</span>`+
+      `<span class="badge ${estadoClass(p.estado)}">${esc(p.estado)}</span>`+
+    `</div>`;
+
+  if(old){
+    html += `<div class="detail-old">${ICON.alert}Sem revisão há ${monthsSince(p.data_revisao)} meses — recomenda-se reavaliação.</div>`;
+  }
+  d.innerHTML = html;
+
+  // alternância de vistas: Resumo  /  Documento (PDF)
+  const tabs = el("div","view-tabs");
+  const tabResumo = el("button","view-tab"+(VIEW.tab!=="pdf"?" active":""),"Resumo");
+  const tabPdf = el("button","view-tab"+(VIEW.tab==="pdf"?" active":""),"Documento (PDF)");
+  tabResumo.onclick=()=>{ VIEW.tab="resumo"; renderApp(); };
+  tabPdf.onclick=()=>{ VIEW.tab="pdf"; renderApp(); };
+  tabs.appendChild(tabResumo); tabs.appendChild(tabPdf);
+  d.appendChild(tabs);
+
+  if(VIEW.tab==="pdf"){
+    // botão documento
+    if(CLOUD){
+      d.appendChild(docButtonEl(p,false));
+      const note = el("div","pdf-note"); note.innerHTML = ICON.info+"O documento abre por ligação segura e temporária (apenas com sessão iniciada). O PDF é a versão oficial e prevalece sobre o resumo.";
+      d.appendChild(note);
+    } else if(present){
+      const a = el("a","btn doc-btn"); a.href=encodeURI(p.link_documento); a.target="_blank"; a.rel="noopener";
+      a.innerHTML = ICON.open+"Abrir documento oficial (PDF)";
+      d.appendChild(a);
+      const note = el("div","pdf-note"); note.innerHTML = ICON.info+"O documento PDF é a versão oficial e prevalece sobre o resumo.";
+      d.appendChild(note);
+    } else {
+      const dm = el("div","doc-missing");
+      dm.innerHTML = ICON.alert+`Documento ainda não carregado nesta interface (referência: <b>${esc(p.link_documento)}</b>). Consultar no sistema institucional.`;
+      d.appendChild(dm);
+    }
+  } else {
+    // vista de resumo / operacionalização
+    if(temResumo(p)){
+      const box = el("div","resumo-box");
+      box.innerHTML = `<div class="resumo-flag">${ICON.info}<span>Resumo operacional de apoio — <b>não substitui</b> o documento oficial. A versão vigente é o PDF.</span></div>`;
+      RESUMO_SECOES.forEach(s=>{
+        const val = (p.resumo[s.k]||"").trim();
+        if(!val) return;
+        const sec = el("div","resumo-sec");
+        const lines = val.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+        let body;
+        if(lines.length>1){
+          body = "<ul>"+lines.map(li=>`<li>${esc(li.replace(/^[-•\d.\)\s]+/,""))}</li>`).join("")+"</ul>";
+        } else {
+          body = `<p>${esc(val)}</p>`;
+        }
+        sec.innerHTML = `<h4>${esc(s.label)}</h4>${body}`;
+        box.appendChild(sec);
+      });
+      d.appendChild(box);
+    } else {
+      const e = el("div","resumo-empty");
+      e.innerHTML = ICON.info+`<span>Sem resumo disponível para este procedimento.${isGestor()?" Use <b>Editar</b> para adicionar a operacionalização.":" Consulte o documento PDF."}</span>`;
+      d.appendChild(e);
+    }
+    // atalho rápido para o PDF também na vista de resumo
+    if(CLOUD){
+      d.appendChild(docButtonEl(p,true));
+    } else if(present){
+      const a = el("a","btn secondary doc-btn"); a.href=encodeURI(p.link_documento); a.target="_blank"; a.rel="noopener";
+      a.innerHTML = ICON.open+"Abrir documento oficial (PDF)";
+      d.appendChild(a);
+    }
+  }
+
+  // specs
+  const specs = el("ul","specs");
+  const row=(k,v)=>`<li><span class="k">${k}</span><span class="v">${v}</span></li>`;
+  let kw = (p.palavras_chave||[]).map(k=>`<span class="kw">${esc(k)}</span>`).join("");
+  specs.innerHTML =
+    row("Categoria", esc(p.categoria)) +
+    row("Área", esc(p.area||"—")) +
+    row("Versão", "v"+esc(p.versao)) +
+    row("Última revisão", fmtDate(p.data_revisao)) +
+    row("Estado", `<span class="badge ${estadoClass(p.estado)}">${esc(p.estado)}</span>`) +
+    row("Palavras-chave", kw?`<span class="kw-list">${kw}</span>`:"—") +
+    row("Responsáveis", esc(p.responsaveis||"—")) +
+    row("Ficheiro", `<span style="font-family:ui-monospace,monospace;font-size:.82rem">${esc(p.link_documento)}</span>`) +
+    row("Atualizado por", `${esc(p.atualizado_por||"—")} · ${fmtDateTime(p.atualizado_em)}`);
+  d.appendChild(specs);
+
+  // ações gestor
+  if(isGestor()){
+    const acts = el("div","gestor-actions");
+    const editBtn = el("button","btn secondary small"); editBtn.style.width="100%"; editBtn.innerHTML=ICON.edit+"Editar";
+    editBtn.onclick=()=>{ VIEW={name:"form",id:p.id}; renderApp(); window.scrollTo(0,0); };
+    acts.appendChild(editBtn);
+
+    if(p.estado!=="Obsoleto"){
+      const arch = el("button","btn secondary small"); arch.style.width="100%"; arch.innerHTML=ICON.archive+"Arquivar";
+      arch.onclick=()=>confirmModal("Arquivar procedimento?",`"${esc(p.titulo)}" passará a Obsoleto e deixará de ser visível para enfermeiros.`,"Arquivar",()=>{
+        applyChange(p.id,{estado:"Obsoleto"}); toast("Procedimento arquivado"); renderApp();
+      });
+      acts.appendChild(arch);
+    } else {
+      const rest = el("button","btn secondary small"); rest.style.width="100%"; rest.innerHTML=ICON.archive+"Repor como Vigente";
+      rest.onclick=()=>{ applyChange(p.id,{estado:"Vigente"}); toast("Procedimento reposto como Vigente"); renderApp(); };
+      acts.appendChild(rest);
+    }
+
+    const del = el("button","btn danger small"); del.style.width="100%"; del.innerHTML=ICON.trash+"Apagar";
+    del.onclick=()=>confirmModal("Apagar definitivamente?",`"${esc(p.titulo)}" será removido desta interface. Esta ação não afeta o documento oficial.`,"Apagar",()=>{
+      DB = DB.filter(x=>x.id!==p.id);
+      if(CLOUD){ cloudDeleteProc(p.id).catch(e=>{ toast("Erro ao apagar na nuvem: "+traduzAuthErro(e)); loadCloudData().then(renderApp); }); }
+      else { saveDB(DB); }
+      toast("Procedimento apagado"); VIEW={name:"list"}; renderApp();
+    },true);
+    acts.appendChild(del);
+    d.appendChild(acts);
+  }
+
+  main.appendChild(d);
+}
+
+/* ============================================================
+   ALTERAÇÕES (auditoria automática)
+   ============================================================ */
+function applyChange(id, patch){
+  const stamp = { ...patch, atualizado_por: SESSION.nome, atualizado_em: new Date().toISOString() };
+  const i = DB.findIndex(x=>x.id===id);
+  if(i>=0) DB[i] = {...DB[i], ...stamp};               // atualização otimista (UI imediata)
+  if(CLOUD){
+    cloudPatchProc(id, stamp).catch(e=>{ toast("Erro ao guardar na nuvem: "+traduzAuthErro(e)); loadCloudData().then(renderApp); });
+  } else { saveDB(DB); }
+}
+
+/* ============================================================
+   RENDER — FORMULÁRIO (adicionar / editar)
+   ============================================================ */
+function renderForm(id){
+  const editing = !!id;
+  const p = editing ? DB.find(x=>x.id===id) : null;
+  if(editing && !p){ VIEW={name:"list"}; renderList(); return; }
+  const main = $("#mainContent"); main.innerHTML="";
+
+  const back = el("button","back-btn"); back.innerHTML=ICON.back+(editing?"Cancelar edição":"Cancelar");
+  back.onclick=()=>{ VIEW = editing?{name:"detail",id}:{name:"list"}; renderApp(); };
+  main.appendChild(back);
+
+  const f = el("form","form-card");
+  const v = (x)=>p?esc(p[x]??""):"";
+  const opt = (arr,sel)=>arr.map(o=>`<option ${o===sel?"selected":""}>${esc(o)}</option>`).join("");
+  f.innerHTML =
+    `<h2>${editing?"Editar procedimento":"Adicionar procedimento"}</h2>`+
+    `<p class="hint">${editing?"As alterações registam automaticamente o seu nome e a data.":"Preencha os metadados de referência ao documento oficial."}</p>`+
+    `<div class="grid2">`+
+      `<div><label>Código *</label><input name="codigo" required value="${v("codigo")}" placeholder="SU_PRO_004/01"></div>`+
+      `<div><label>Versão *</label><input name="versao" required value="${v("versao")}" placeholder="00"></div>`+
+    `</div>`+
+    `<label>Título *</label><input name="titulo" required value="${v("titulo")}" placeholder="Nome do procedimento">`+
+    `<div class="grid2">`+
+      `<div><label>Categoria *</label><select name="categoria">${opt(CATEGORIAS, p?p.categoria:"Outro")}</select></div>`+
+      `<div><label>Estado *</label><select name="estado">${opt(ESTADOS, p?p.estado:"Vigente")}</select></div>`+
+    `</div>`+
+    `<label>Área (descrição detalhada)</label><input name="area" value="${v("area")}" placeholder="Urgência / Via Verde / Cardiologia">`+
+    `<div class="grid2">`+
+      `<div><label>Data da última revisão *</label><input type="date" name="data_revisao" required value="${p?esc(p.data_revisao):""}"></div>`+
+      `<div><label>Link / ficheiro do documento *</label><input name="link_documento" required value="${v("link_documento")}" placeholder="ficheiro.pdf ou https://…"></div>`+
+    `</div>`+
+    `<label>Palavras-chave (separadas por vírgula)</label><input name="palavras_chave" value="${p?esc((p.palavras_chave||[]).join(", ")):""}" placeholder="triagem, prioridade, manchester">`+
+    `<label>Responsáveis pelo documento</label><textarea name="responsaveis" placeholder="Nomes dos autores/responsáveis">${p?esc(p.responsaveis||""):""}</textarea>`+
+    `<div class="form-sep">Resumo / Operacionalização <span>(apoio rápido — não substitui o PDF; uma linha por tópico nas listas)</span></div>`+
+    RESUMO_SECOES.map(s=>{
+      const val = (p && p.resumo && p.resumo[s.k]) ? esc(p.resumo[s.k]) : "";
+      const ph = s.k==="objetivo" ? "Em 1-2 frases, para que serve o procedimento" :
+                 s.k==="passos" ? "Um passo por linha (1, 2, 3…)" : "Um item por linha";
+      return `<label>${esc(s.label)}</label><textarea name="resumo_${s.k}" placeholder="${ph}">${val}</textarea>`;
+    }).join("")+
+    `<div class="audit-note">${ICON.info}<span>Ao guardar, <b>Atualizado por</b> será registado como <b>${esc(SESSION.nome)}</b> com a data e hora atuais.</span></div>`+
+    `<div class="form-actions">`+
+      `<button type="button" class="btn secondary" id="cancelForm">Cancelar</button>`+
+      `<button type="submit" class="btn">${editing?"Guardar alterações":"Adicionar"}</button>`+
+    `</div>`;
+
+  f.onsubmit = (e)=>{
+    e.preventDefault();
+    const fd = new FormData(f);
+    const data = {
+      codigo: fd.get("codigo").trim(),
+      versao: fd.get("versao").trim(),
+      titulo: fd.get("titulo").trim(),
+      categoria: fd.get("categoria"),
+      estado: fd.get("estado"),
+      area: fd.get("area").trim(),
+      data_revisao: fd.get("data_revisao"),
+      link_documento: fd.get("link_documento").trim(),
+      palavras_chave: fd.get("palavras_chave").split(",").map(s=>s.trim()).filter(Boolean),
+      responsaveis: fd.get("responsaveis").trim()
+    };
+    const resumo = {};
+    let temAlgum=false;
+    RESUMO_SECOES.forEach(s=>{ const v=(fd.get("resumo_"+s.k)||"").trim(); resumo[s.k]=v; if(v) temAlgum=true; });
+    data.resumo = temAlgum ? resumo : null;
+    if(editing){
+      applyChange(id, data); toast("Alterações guardadas"); VIEW={name:"detail",id};
+    } else {
+      const newId = "P"+Date.now();
+      const proc = {id:newId, ...data, atualizado_por:SESSION.nome, atualizado_em:new Date().toISOString()};
+      DB.push(proc);
+      if(CLOUD){ cloudSaveProc(proc, true).catch(e=>{ toast("Erro ao criar na nuvem: "+traduzAuthErro(e)); loadCloudData().then(renderApp); }); }
+      else { saveDB(DB); }
+      toast("Procedimento adicionado"); VIEW={name:"detail",id:newId};
+    }
+    renderApp(); window.scrollTo(0,0);
+  };
+  f.querySelector("#cancelForm").onclick=()=>{ VIEW = editing?{name:"detail",id}:{name:"list"}; renderApp(); };
+  main.appendChild(f);
+}
+
+/* ============================================================
+   GESTÃO DE CONTAS (gestor)
+   ============================================================ */
+function setRole(email, role){
+  const u = USERS.find(x=>x.email.toLowerCase()===email.toLowerCase());
+  if(u){ u.role=role; saveUsers(USERS); }
+}
+function gestorCount(){ return USERS.filter(x=>x.role==="gestor").length; }
+const isYouUser = (u)=> CLOUD ? (SESSION.id===u.id) : (SESSION.email.toLowerCase()===u.email.toLowerCase());
+
+function renderUsers(){
+  const main=$("#mainContent"); main.innerHTML="";
+  const back=el("button","back-btn"); back.innerHTML=ICON.back+"Voltar à lista";
+  back.onclick=()=>{ VIEW={name:"list"}; renderApp(); };
+  main.appendChild(back);
+
+  const wrap=el("div","form-card");
+  wrap.innerHTML = `<h2>Gerir contas</h2>`+
+    `<p class="hint">Conceda ou retire o perfil de <b>Gestor</b> e faça a gestão das contas da equipa.</p>`+
+    (CLOUD
+      ? `<div class="audit-note">${ICON.info}<span>Os enfermeiros criam a própria conta no ecrã inicial (<b>Criar conta</b>). Aqui pode tornar/retirar Gestor, enviar reposição de palavra-passe e remover o perfil. As alterações de perfil aplicam-se no próximo início de sessão do utilizador.</span></div>`
+      : `<div class="audit-note">${ICON.info}<span>Autenticação de demonstração (palavras-passe guardadas sem cifra). Estas contas vivem neste browser.</span></div>`);
+  main.appendChild(wrap);
+
+  if(CLOUD){
+    const loading=el("div","result-count","A carregar contas…"); loading.style.margin="6px 2px"; wrap.appendChild(loading);
+    cloudListProfiles()
+      .then(list=>{ USERS = list.map(p=>({id:p.id,email:p.email,nome:p.nome||p.email,role:p.role})); loading.remove(); buildUserRows(wrap); })
+      .catch(e=>{ loading.textContent="Erro ao carregar contas: "+traduzAuthErro(e); });
+  } else {
+    const addBtn=el("button","btn small"); addBtn.style.margin="0 0 14px"; addBtn.innerHTML=ICON.plus+"Nova conta";
+    addBtn.onclick=()=>userForm(null);
+    wrap.appendChild(addBtn);
+    buildUserRows(wrap);
+  }
+}
+
+function buildUserRows(wrap){
+  USERS.slice().sort((a,b)=>(a.nome||"").localeCompare(b.nome||"","pt")).forEach(u=>{
+    const isYou = isYouUser(u);
+    const row=el("div","user-row");
+    const head=el("div","user-head");
+    head.innerHTML = `<div class="info"><b>${esc(u.nome)}${isYou?'<span class="you-tag">Você</span>':''}</b><small>${esc(u.email)}</small></div>`+
+      `<span class="role-badge role-${u.role}">${u.role==="gestor"?"Gestor":"Enfermeiro"}</span>`;
+    row.appendChild(head);
+
+    const acts=el("div","user-actions");
+    if(u.role==="enfermeiro"){
+      const b=el("button","btn"); b.innerHTML=ICON.shield+"Tornar Gestor";
+      b.onclick=async ()=>{
+        if(CLOUD){ try{ await cloudSetRole(u.id,"gestor"); toast(`${u.nome} é agora Gestor`); renderUsers(); }catch(e){ toast("Erro: "+traduzAuthErro(e)); } }
+        else { setRole(u.email,"gestor"); toast(`${u.nome} é agora Gestor`); renderUsers(); }
+      };
+      acts.appendChild(b);
+    } else {
+      const b=el("button","btn secondary"); b.innerHTML=ICON.shield+"Retirar Gestor";
+      b.onclick=()=>{
+        if(gestorCount()<=1){ toast("Tem de existir pelo menos um Gestor"); return; }
+        confirmModal("Retirar perfil de Gestor?",`${u.nome} passará a Enfermeiro.`,"Retirar",async ()=>{
+          try{
+            if(CLOUD){ await cloudSetRole(u.id,"enfermeiro"); } else { setRole(u.email,"enfermeiro"); }
+            if(isYou){ SESSION.role="enfermeiro"; if(!CLOUD) sessionStorage.setItem(SS_KEY,JSON.stringify(SESSION)); toast("Já não é Gestor"); VIEW={name:"list"}; renderApp(); }
+            else { toast("Perfil atualizado"); renderUsers(); }
+          }catch(e){ toast("Erro: "+traduzAuthErro(e)); }
+        });
+      };
+      acts.appendChild(b);
+    }
+
+    if(CLOUD){
+      const pb=el("button","btn secondary"); pb.innerHTML=ICON.key+"Repor palavra-passe";
+      pb.onclick=async ()=>{ try{ await sb.auth.resetPasswordForEmail(u.email); toast("Email de reposição enviado a "+u.email); }catch(e){ toast("Erro: "+traduzAuthErro(e)); } };
+      acts.appendChild(pb);
+    } else {
+      const eb=el("button","btn secondary"); eb.innerHTML=ICON.edit+"Editar";
+      eb.onclick=()=>userForm(u.email); acts.appendChild(eb);
+      const pb=el("button","btn secondary"); pb.innerHTML=ICON.key+"Palavra-passe";
+      pb.onclick=()=>userForm(u.email, true); acts.appendChild(pb);
+    }
+
+    if(!isYou){
+      const db=el("button","btn danger"); db.innerHTML=ICON.trash+"Remover";
+      db.onclick=()=>confirmModal("Remover conta?",`A conta de ${u.nome} (${u.email}) será removida.`,"Remover",async ()=>{
+        if(u.role==="gestor" && gestorCount()<=1){ toast("Tem de existir pelo menos um Gestor"); return; }
+        try{
+          if(CLOUD){ await cloudDeleteProfile(u.id); } else { USERS=USERS.filter(x=>x.email.toLowerCase()!==u.email.toLowerCase()); saveUsers(USERS); }
+          toast("Conta removida"); renderUsers();
+        }catch(e){ toast("Erro: "+traduzAuthErro(e)); }
+      },true);
+      acts.appendChild(db);
+    }
+    row.appendChild(acts);
+    wrap.appendChild(row);
+  });
+}
+
+// Formulário de conta (criar/editar). focusPass=true abre direto na palavra-passe.
+function userForm(email, focusPass){
+  const editing=!!email;
+  const u = editing ? USERS.find(x=>x.email.toLowerCase()===email.toLowerCase()) : null;
+  const root=$("#modalRoot");
+  const back=el("div","modal-back");
+  const close=()=>root.innerHTML="";
+  back.innerHTML =
+    `<div class="modal"><h3>${editing?"Editar conta":"Nova conta"}</h3>`+
+    `<form id="uForm" autocomplete="off">`+
+      `<label>Nome</label><input name="nome" required value="${u?esc(u.nome):""}" placeholder="Nome do utilizador">`+
+      `<label>Email</label><input name="email" type="email" required value="${u?esc(u.email):""}" ${editing?"readonly":""} placeholder="nome@su.pt">`+
+      `<label>Palavra-passe${editing?" (deixe em branco para manter)":""}</label><input name="pass" type="text" ${editing?"":"required"} value="" placeholder="${editing?"••••••••":"defina uma palavra-passe"}">`+
+      `<label>Perfil</label><select name="role"><option value="enfermeiro" ${u&&u.role==="enfermeiro"?"selected":""}>Enfermeiro</option><option value="gestor" ${u&&u.role==="gestor"?"selected":""}>Gestor</option></select>`+
+      `<div class="row" style="margin-top:18px"><button type="button" class="btn secondary" id="uCancel">Cancelar</button><button type="submit" class="btn">${editing?"Guardar":"Criar"}</button></div>`+
+    `</form></div>`;
+  root.appendChild(back);
+  back.onclick=e=>{ if(e.target===back) close(); };
+  back.querySelector("#uCancel").onclick=close;
+  if(focusPass) setTimeout(()=>back.querySelector('input[name="pass"]')?.focus(),50);
+  back.querySelector("#uForm").onsubmit=(e)=>{
+    e.preventDefault();
+    const fd=new FormData(e.target);
+    const nome=fd.get("nome").trim(), em=fd.get("email").trim().toLowerCase(), pass=fd.get("pass"), role=fd.get("role");
+    if(!editing && USERS.some(x=>x.email.toLowerCase()===em)){ toast("Já existe uma conta com esse email"); return; }
+    if(editing){
+      u.nome=nome; if(pass) u.pass=pass;
+      // impedir rebaixar o último gestor
+      if(u.role==="gestor" && role!=="gestor" && gestorCount()<=1){ toast("Tem de existir pelo menos um Gestor"); return; }
+      const wasYou = SESSION.email.toLowerCase()===u.email.toLowerCase();
+      u.role=role; saveUsers(USERS);
+      if(wasYou){ SESSION.role=role; SESSION.nome=nome; sessionStorage.setItem(SS_KEY,JSON.stringify(SESSION)); }
+      toast("Conta atualizada");
+    } else {
+      USERS.push({email:em, pass, nome, role}); saveUsers(USERS); toast("Conta criada");
+    }
+    close(); renderApp();
+  };
+}
+
+/* ============================================================
+   MODAL DE CONFIRMAÇÃO
+   ============================================================ */
+function confirmModal(title, msg, okLabel, onOk, danger){
+  const root = $("#modalRoot");
+  const back = el("div","modal-back");
+  back.innerHTML =
+    `<div class="modal"><h3>${esc(title)}</h3><p>${esc(msg)}</p>`+
+    `<div class="row"><button class="btn secondary" id="mCancel">Cancelar</button>`+
+    `<button class="btn ${danger?"danger":""}" id="mOk">${esc(okLabel)}</button></div></div>`;
+  root.appendChild(back);
+  const close=()=>root.innerHTML="";
+  back.onclick=(e)=>{ if(e.target===back) close(); };
+  back.querySelector("#mCancel").onclick=close;
+  back.querySelector("#mOk").onclick=()=>{ close(); onOk(); };
+}
+
+/* ============================================================
+   PARTILHAR — QR CODE do URL atual
+   ============================================================ */
+function shareModal(){
+  const root = $("#modalRoot");
+  const back = el("div","modal-back");
+  const close = ()=>root.innerHTML="";
+  const url = location.href;
+  const isFile = location.protocol==="file:";
+  const isLocal = /^(https?:\/\/)?(localhost|127\.0\.0\.1)([:\/]|$)/i.test(location.host);
+
+  if(isFile){
+    back.innerHTML =
+      `<div class="modal qr-modal"><h3>Partilhar app</h3>`+
+      `<div class="qr-hint warn">A app está aberta em <b>file://</b>, que não é acessível a partir de outros dispositivos, por isso não há link para partilhar.<br><br>`+
+      `Abra a app pelo atalho <code>Abrir Procedimentos.command</code> (ou um servidor local) e toque novamente em <b>Partilhar</b>. Os colegas têm de estar na mesma rede Wi-Fi.</div>`+
+      `<button class="btn secondary" id="qrClose" style="margin-top:14px">Fechar</button></div>`;
+    root.appendChild(back);
+    back.onclick=e=>{ if(e.target===back) close(); };
+    back.querySelector("#qrClose").onclick=close;
+    return;
+  }
+
+  let dataUrl="";
+  try{ const qr=qrcode(0,"M"); qr.addData(url); qr.make(); dataUrl=qr.createDataURL(6,4); }
+  catch(e){ console.error("QR:",e); }
+
+  back.innerHTML =
+    `<div class="modal qr-modal"><h3>Partilhar app</h3>`+
+    (dataUrl?`<img src="${dataUrl}" alt="QR code para ${esc(url)}">`:`<p>Não foi possível gerar o código QR.</p>`)+
+    `<div class="qr-url">${esc(url)}</div>`+
+    `<div class="row"><button class="btn secondary" id="qrCopy">Copiar link</button>`+
+    (dataUrl?`<button class="btn" id="qrDl">Descarregar QR</button>`:"")+`</div>`+
+    `<div class="qr-hint ${isLocal?"warn":""}">`+
+      (isLocal
+        ? `⚠️ Está a aceder por <b>localhost</b> — este QR só funciona neste computador. Para telemóveis, abra a app pelo endereço de rede que o atalho mostra (ex.: <code>http://192.168.x.x:8000</code>) e gere o QR a partir daí.`
+        : `Para abrir noutro dispositivo: estar na <b>mesma rede Wi-Fi</b> e manter este computador com o servidor a correr.`)+
+    `</div>`+
+    `<button class="btn secondary" id="qrClose" style="margin-top:10px">Fechar</button></div>`;
+  root.appendChild(back);
+  back.onclick=e=>{ if(e.target===back) close(); };
+  back.querySelector("#qrClose").onclick=close;
+  back.querySelector("#qrCopy").onclick=()=>{
+    (navigator.clipboard?.writeText(url) || Promise.reject()).then(()=>toast("Link copiado")).catch(()=>{
+      const t=document.createElement("textarea"); t.value=url; document.body.appendChild(t); t.select();
+      try{ document.execCommand("copy"); toast("Link copiado"); }catch(_){ toast("Copie o link manualmente"); }
+      t.remove();
+    });
+  };
+  const dl = back.querySelector("#qrDl");
+  if(dl) dl.onclick=()=>{ const a=document.createElement("a"); a.href=dataUrl; a.download="procedimentos-qrcode.png"; a.click(); };
+}
+
+/* ============================================================
+   WIRING — LOGIN
+   ============================================================ */
+$("#loginForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const email=$("#email").value.trim(), pass=$("#pass").value;
+  const er=$("#loginErr");
+  if(CLOUD){
+    const submit=$("#loginSubmit"); submit.disabled=true; er.classList.add("hidden");
+    try{
+      if(LOGIN_MODE==="signup"){
+        const nome=$("#nome").value.trim();
+        if(!nome){ throw new Error("Indique o seu nome."); }
+        const { data, error } = await sb.auth.signUp({ email, password:pass, options:{ data:{ nome } } });
+        if(error) throw error;
+        if(!data.session){
+          er.textContent="Conta criada. Confirme o email (se pedido) e depois inicie sessão.";
+          er.classList.remove("hidden"); setLoginMode("login");
+        } else { await onSignedIn(data.session); }
+      } else {
+        const { data, error } = await sb.auth.signInWithPassword({ email, password:pass });
+        if(error) throw error;
+        await onSignedIn(data.session);
+      }
+      $("#pass").value="";
+    }catch(err){ er.textContent=traduzAuthErro(err); er.classList.remove("hidden"); }
+    finally{ submit.disabled=false; }
+    return;
+  }
+  // modo local (sem nuvem configurada)
+  const ok = login(email, pass);
+  if(ok){ er.classList.add("hidden"); $("#pass").value=""; VIEW={name:"list",id:null}; renderApp(); }
+  else { er.textContent="Email ou palavra-passe incorretos."; er.classList.remove("hidden"); }
+});
+$("#authToggle").addEventListener("click", ()=> setLoginMode(LOGIN_MODE==="login"?"signup":"login"));
+document.querySelectorAll(".demo-btn").forEach(b=>{
+  b.onclick=()=>{ $("#email").value=b.dataset.email; $("#pass").value=b.dataset.pass; $("#loginForm").requestSubmit(); };
+});
+$("#logoutBtn").addEventListener("click",logout);
+$("#shareBtn").addEventListener("click",shareModal);
+
+/* ============================================================
+   ARRANQUE
+   ============================================================ */
+// Mostrar o logótipo (logo.jpg) quando existir; caso contrário fica o ícone SVG.
+(function(){ const i=new Image(); i.onload=()=>document.body.classList.add("has-logo"); i.src="logo.jpg?v=3"; })();
+
+// PWA: registar service worker (só ativa em HTTPS ou localhost) para instalação + offline.
+if("serviceWorker" in navigator){
+  window.addEventListener("load", ()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+}
+// Botão "Instalar" (desktop/Android). No iPhone/iPad usa-se Partilhar → Adicionar ao ecrã principal.
+let _deferredPrompt=null;
+window.addEventListener("beforeinstallprompt",(e)=>{ e.preventDefault(); _deferredPrompt=e; const b=$("#installBtn"); if(b) b.classList.remove("hidden"); });
+window.addEventListener("appinstalled",()=>{ const b=$("#installBtn"); if(b) b.classList.add("hidden"); _deferredPrompt=null; });
+$("#installBtn").addEventListener("click", async ()=>{
+  if(!_deferredPrompt) return;
+  _deferredPrompt.prompt();
+  await _deferredPrompt.userChoice;
+  _deferredPrompt=null; $("#installBtn").classList.add("hidden");
+});
+
+if(CLOUD){ setupLoginUI(); bootCloud(); }
+else { restoreSession(); renderApp(); }
+</script>
+</body>
+</html>
