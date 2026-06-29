@@ -2,10 +2,9 @@
    Permite instalar a app e funcionar offline.
    IMPORTANTE: ao publicar uma nova versão da app, incrementar CACHE (v1 -> v2…)
    para forçar a atualização dos ficheiros em cache. */
-const CACHE = "su-connect-v2";
+const CACHE = "su-connect-v4";
 const SHELL = [
   "./",
-  "./index.html",
   "./manifest.webmanifest",
   "./config.js",
   "./supabase.js",
@@ -46,7 +45,7 @@ self.addEventListener("fetch", (e) => {
     e.respondWith(
       fetch(req)
         .then((r) => { const cp = r.clone(); caches.open(CACHE).then((c) => c.put(req, cp)); return r; })
-        .catch(() => caches.match(req).then((m) => m || caches.match("./index.html")))
+        .catch(() => caches.match(req).then((m) => m || caches.match("./")))
     );
     return;
   }

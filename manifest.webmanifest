@@ -3,7 +3,7 @@
   "short_name": "SU Connect",
   "description": "Consulta de procedimentos clínicos do Serviço de Urgência.",
   "lang": "pt-PT",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",

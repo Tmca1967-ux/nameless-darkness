@@ -289,6 +289,52 @@
   body.has-logo img.login-logo{display:block}
 
   footer.app-foot{text-align:center;color:var(--muted);font-size:.72rem;padding:24px 16px 32px;line-height:1.5}
+
+  /* ---------- Feedback ---------- */
+  .fab{position:fixed;right:16px;bottom:16px;z-index:90;display:inline-flex;align-items:center;gap:8px;
+    background:var(--primary);color:#fff;border:none;border-radius:28px;height:52px;padding:0 20px;
+    font-size:.95rem;font-weight:650;box-shadow:0 6px 20px rgba(20,48,58,.28);cursor:pointer}
+  .fab:hover{background:var(--primary-dark)}
+  .fab svg{width:22px;height:22px;flex:none}
+  @media(max-width:480px){ .fab{padding:0;width:52px;justify-content:center} .fab span{display:none} }
+  .fb-note{background:var(--revisao-bg);color:var(--revisao);border-radius:8px;padding:8px 10px;
+    font-size:.78rem;font-weight:600;margin:10px 0 4px;display:flex;gap:8px;align-items:flex-start}
+  .fb-note svg{width:16px;height:16px;flex:none;margin-top:1px}
+  .fb-ctx{font-size:.8rem;color:var(--muted);background:var(--surface-2);border:1px solid var(--line);
+    border-radius:8px;padding:8px 10px;margin:8px 0 0}
+  .fb-row{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+  .fb-row .fb-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+  .fb-row .fb-msg{font-size:.95rem;line-height:1.45;white-space:pre-wrap}
+  .fb-row .fb-meta{font-size:.76rem;color:var(--muted);margin-top:8px}
+  .badge.tipo-Sugestão,.badge.tipo-Sugestao{background:var(--vigente-bg);color:var(--vigente)}
+  .badge.tipo-Erro{background:var(--alerta-bg);color:var(--alerta)}
+  .badge.tipo-Dúvida,.badge.tipo-Duvida{background:var(--primary-soft);color:var(--primary-dark)}
+  .badge.est-Novo{background:var(--revisao-bg);color:var(--revisao)}
+  .badge.est-Resolvido{background:var(--obsoleto-bg);color:var(--obsoleto)}
+  .fb-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .fb-actions .btn{width:auto;min-height:36px;font-size:.8rem;padding:0 12px}
+
+  /* ---------- Avisos (gestor -> enfermeiro) ---------- */
+  .btn-ghost.bell{position:relative;padding:0 10px}
+  .btn-ghost.bell svg{width:20px;height:20px;display:block}
+  .bell-count{position:absolute;top:-3px;right:-3px;background:var(--alerta);color:#fff;
+    font-size:.6rem;font-weight:700;min-width:16px;height:16px;border-radius:9px;
+    display:inline-flex;align-items:center;justify-content:center;padding:0 3px;line-height:1}
+  .avisos-banner{background:var(--primary-soft);border:1px solid #bcd6df;color:var(--primary-dark);
+    border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:.88rem;font-weight:600;
+    display:flex;gap:10px;align-items:center}
+  .avisos-banner svg{width:20px;height:20px;flex:none}
+  .avisos-banner button{margin-left:auto;background:var(--primary);color:#fff;border:none;
+    border-radius:8px;padding:8px 12px;font-weight:700;font-size:.82rem;cursor:pointer}
+  .aviso-row{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+  .aviso-row.unread{border-left:4px solid var(--primary)}
+  .aviso-row .av-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+  .aviso-row .av-msg{font-size:.95rem;line-height:1.45;white-space:pre-wrap}
+  .aviso-row .av-ctx{font-size:.8rem;color:var(--muted);background:var(--surface-2);
+    border-radius:6px;padding:6px 8px;margin-top:6px}
+  .aviso-row .av-meta{font-size:.76rem;color:var(--muted);margin-top:8px}
+  .badge.tipo-Aviso{background:var(--primary-soft);color:var(--primary-dark)}
+  .badge.tipo-Resposta{background:var(--vigente-bg);color:var(--vigente)}
 </style>
 </head>
 <body>
@@ -341,6 +387,10 @@
       <h1>SU Connect<small>Serviço de Urgência</small></h1>
       <div class="user-chip">
         <span class="role" id="userRole"></span>
+        <button class="btn-ghost hidden bell" id="bellBtn" title="Avisos" aria-label="Avisos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          <span id="bellCount" class="bell-count hidden"></span>
+        </button>
         <button class="btn-ghost hidden" id="installBtn" title="Instalar a app">Instalar</button>
         <button class="btn-ghost" id="shareBtn" title="Partilhar app (QR)" aria-label="Partilhar app">Partilhar</button>
         <button class="btn-ghost" id="logoutBtn">Sair</button>
@@ -352,6 +402,10 @@
     Interface de consulta rápida · não substitui o sistema documental oficial (DiOr).<br>
     <span id="footMeta"></span>
   </footer>
+  <button id="fabFeedback" class="fab hidden" title="Enviar feedback" aria-label="Enviar feedback">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>Feedback</span>
+  </button>
 </div>
 
 <div id="toast"></div>
@@ -2935,6 +2989,10 @@ function subscribeRealtime(){
       await loadCloudData();
       if(SESSION && (VIEW.name==="list" || VIEW.name==="detail")) renderApp();
     })
+    .on("postgres_changes", { event:"INSERT", schema:"public", table:"avisos" }, async ()=>{
+      await refreshUnread();
+      if(SESSION && VIEW.name==="list") renderApp();
+    })
     .subscribe();
 }
 async function fetchMyProfile(user){
@@ -2946,12 +3004,13 @@ async function fetchMyProfile(user){
 }
 async function onSignedIn(session){
   const prof = await fetchMyProfile(session.user);
-  SESSION = { id:session.user.id, email:prof.email||session.user.email, nome:prof.nome||prof.email||session.user.email, role:prof.role||"enfermeiro" };
+  SESSION = { id:session.user.id, email:prof.email||session.user.email, nome:prof.nome||prof.email||session.user.email, role:prof.role||"enfermeiro", avisos_visto_em:prof.avisos_visto_em||null };
   await loadCloudData();
   subscribeRealtime();
   FILTERS = {q:"",categoria:"Todas",estado:"Vigente"};
   VIEW = {name:"list",id:null};
   renderApp();
+  refreshUnread();
 }
 async function bootCloud(){
   renderApp(); // mostra o login enquanto verifica a sessão
@@ -2981,6 +3040,64 @@ async function cloudSeed(){ const { error } = await sb.from("procedimentos").ins
 async function cloudListProfiles(){ const { data, error } = await sb.from("profiles").select("*"); if(error) throw error; return data||[]; }
 async function cloudSetRole(id, role){ const { error } = await sb.from("profiles").update({role}).eq("id", id); if(error) throw error; }
 async function cloudDeleteProfile(id){ const { error } = await sb.from("profiles").delete().eq("id", id); if(error) throw error; }
+
+/* Feedback */
+const FEEDBACK_LS = "su_feedback_local_v1";
+async function submitFeedback(fb){
+  const row = {
+    tipo: fb.tipo, mensagem: fb.mensagem,
+    proc_codigo: fb.proc_codigo || null, proc_titulo: fb.proc_titulo || null,
+    user_id: SESSION.id || null, user_email: SESSION.email, user_nome: SESSION.nome
+  };
+  if(CLOUD){ const { error } = await sb.from("feedback").insert(row); if(error) throw error; }
+  else { // modo local: guarda no dispositivo
+    const arr = JSON.parse(localStorage.getItem(FEEDBACK_LS)||"[]");
+    arr.unshift({...row, id:"L"+Date.now(), estado:"Novo", created_at:new Date().toISOString()});
+    localStorage.setItem(FEEDBACK_LS, JSON.stringify(arr));
+  }
+}
+async function listFeedback(){
+  if(CLOUD){ const { data, error } = await sb.from("feedback").select("*").order("created_at",{ascending:false}); if(error) throw error; return data||[]; }
+  return JSON.parse(localStorage.getItem(FEEDBACK_LS)||"[]");
+}
+async function setFeedbackEstado(id, estado){
+  if(CLOUD){ const { error } = await sb.from("feedback").update({estado}).eq("id", id); if(error) throw error; }
+  else { const arr=JSON.parse(localStorage.getItem(FEEDBACK_LS)||"[]"); const f=arr.find(x=>x.id===id); if(f) f.estado=estado; localStorage.setItem(FEEDBACK_LS, JSON.stringify(arr)); }
+}
+
+/* Avisos / mensagens do gestor para enfermeiros */
+const AVISOS_LS="su_avisos_local_v1", AVISOS_VISTO_LS="su_avisos_visto_v1";
+let UNREAD_AVISOS = 0;
+async function createAviso(a){
+  const row={ tipo:a.tipo||"Aviso", mensagem:a.mensagem, destino_user_id:a.destino_user_id||null, feedback_id:a.feedback_id||null, created_by:SESSION.id||null };
+  if(CLOUD){ const { error } = await sb.from("avisos").insert(row); if(error) throw error; }
+  else { const arr=JSON.parse(localStorage.getItem(AVISOS_LS)||"[]"); arr.unshift({...row,id:"A"+Date.now(),created_at:new Date().toISOString()}); localStorage.setItem(AVISOS_LS,JSON.stringify(arr)); }
+}
+async function listAvisos(){
+  if(CLOUD){ const { data, error } = await sb.from("avisos").select("*").order("created_at",{ascending:false}); if(error) throw error; return data||[]; }
+  const arr=JSON.parse(localStorage.getItem(AVISOS_LS)||"[]");
+  return arr.filter(x=> x.destino_user_id==null || x.destino_user_id===SESSION.id);
+}
+function myVistoEm(){ return CLOUD ? (SESSION.avisos_visto_em||null) : (localStorage.getItem(AVISOS_VISTO_LS)||null); }
+async function markAvisosSeen(){
+  const now=new Date().toISOString();
+  if(CLOUD){ try{ await sb.rpc("marcar_avisos_vistos"); }catch(e){} SESSION.avisos_visto_em=now; }
+  else { localStorage.setItem(AVISOS_VISTO_LS, now); }
+}
+async function refreshUnread(){
+  if(SESSION && !isGestor()){
+    try{ const list=await listAvisos(); const v=myVistoEm()?new Date(myVistoEm()).getTime():0;
+      UNREAD_AVISOS = list.filter(a=> new Date(a.created_at).getTime() > v).length; }
+    catch(e){ UNREAD_AVISOS=0; }
+  } else UNREAD_AVISOS=0;
+  updateBell();
+}
+function updateBell(){
+  const b=$("#bellBtn"), c=$("#bellCount"); if(!b) return;
+  const show = !!SESSION && !isGestor();
+  b.classList.toggle("hidden", !show);
+  if(c){ c.textContent = UNREAD_AVISOS>0 ? (UNREAD_AVISOS>9?"9+":String(UNREAD_AVISOS)) : ""; c.classList.toggle("hidden", UNREAD_AVISOS<=0); }
+}
 
 function traduzAuthErro(err){
   const m = (err && (err.message||err.error_description||"")) + "";
@@ -3066,7 +3183,9 @@ const ICON = {
   empty:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>',
   users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
   key:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.6 7.6a5 5 0 1 0-1.4 1.4l3.5 3.5L16 16l2 2 3-3-7.6-7.4z"/></svg>',
-  shield:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg>'
+  shield:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg>',
+  chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
 };
 
 /* ============================================================
@@ -3129,7 +3248,12 @@ function renderApp(){
   if(VIEW.name==="detail") renderDetail(VIEW.id);
   else if(VIEW.name==="form") renderForm(VIEW.id);
   else if(VIEW.name==="users" && isGestor()) renderUsers();
+  else if(VIEW.name==="feedback" && isGestor()) renderFeedback();
+  else if(VIEW.name==="avisos") renderAvisos();
   else renderList();
+  // FAB de feedback visível na lista e no detalhe
+  $("#fabFeedback").classList.toggle("hidden", !(VIEW.name==="list" || VIEW.name==="detail"));
+  updateBell();
 }
 
 /* ============================================================
@@ -3139,6 +3263,14 @@ function renderList(){
   const main = $("#mainContent"); main.innerHTML="";
 
   const fpn = fileProtocolNotice(); if(fpn) main.appendChild(fpn);
+
+  // banner de avisos do gestor (enfermeiro com mensagens por ler)
+  if(!isGestor() && UNREAD_AVISOS>0){
+    const ab=el("div","avisos-banner");
+    ab.innerHTML = ICON.chat+`<span>Tem <b>${UNREAD_AVISOS}</b> nova(s) mensagem(ns) do gestor.</span><button id="verAvisos">Ver</button>`;
+    main.appendChild(ab);
+    ab.querySelector("#verAvisos").onclick=()=>{ VIEW={name:"avisos"}; renderApp(); window.scrollTo(0,0); };
+  }
 
   // toolbar
   const tb = el("div","toolbar");
@@ -3203,6 +3335,9 @@ function renderList(){
     const usersBtn = el("button","btn small secondary"); usersBtn.innerHTML = ICON.users+"Gerir contas";
     usersBtn.onclick=()=>{ VIEW={name:"users"}; renderApp(); window.scrollTo(0,0); };
     addBar.appendChild(usersBtn);
+    const fbBtn = el("button","btn small secondary"); fbBtn.innerHTML = ICON.chat+"Feedback";
+    fbBtn.onclick=()=>{ VIEW={name:"feedback"}; renderApp(); window.scrollTo(0,0); };
+    addBar.appendChild(fbBtn);
     if(CLOUD){
       if(DB.length===0){
         const seedBtn = el("button","btn small secondary"); seedBtn.innerHTML = ICON.plus+"Carregar dados de exemplo";
@@ -3668,6 +3803,147 @@ function userForm(email, focusPass){
 }
 
 /* ============================================================
+   FEEDBACK
+   ============================================================ */
+function feedbackModal(){
+  const root=$("#modalRoot");
+  const back=el("div","modal-back");
+  const close=()=>root.innerHTML="";
+  // contexto: se estiver num detalhe, sugere esse procedimento
+  let ctxProc = (VIEW.name==="detail") ? DB.find(x=>x.id===VIEW.id) : null;
+  const tipos=["Sugestão","Erro","Dúvida"];
+  back.innerHTML =
+    `<div class="modal"><h3>Enviar feedback</h3>`+
+    `<form id="fbForm" autocomplete="off">`+
+      `<label>Tipo</label><select name="tipo">${tipos.map(t=>`<option>${t}</option>`).join("")}</select>`+
+      (ctxProc?`<div class="fb-ctx" id="fbCtx" data-on="1">Sobre: <b>${esc(ctxProc.titulo)}</b> <a href="#" id="fbCtxClear" style="float:right">tornar geral</a></div>`:"")+
+      `<label>Mensagem</label><textarea name="mensagem" required placeholder="A sua sugestão, erro encontrado ou dúvida…" style="min-height:110px"></textarea>`+
+      `<div class="fb-note">${ICON.alert}<span>Não inclua dados de doentes (nome, nº processo, etc.).</span></div>`+
+      `<div class="row" style="margin-top:16px"><button type="button" class="btn secondary" id="fbCancel">Cancelar</button><button type="submit" class="btn" id="fbSend">Enviar</button></div>`+
+    `</form></div>`;
+  root.appendChild(back);
+  back.onclick=e=>{ if(e.target===back) close(); };
+  back.querySelector("#fbCancel").onclick=close;
+  const ctxEl=back.querySelector("#fbCtx");
+  const clr=back.querySelector("#fbCtxClear");
+  if(clr) clr.onclick=(e)=>{ e.preventDefault(); ctxEl.dataset.on="0"; ctxEl.style.display="none"; };
+  back.querySelector("#fbForm").onsubmit=async (e)=>{
+    e.preventDefault();
+    const fd=new FormData(e.target);
+    const msg=(fd.get("mensagem")||"").trim();
+    if(!msg) return;
+    const useCtx = ctxEl && ctxEl.dataset.on==="1";
+    const btn=back.querySelector("#fbSend"); btn.disabled=true;
+    try{
+      await submitFeedback({
+        tipo: fd.get("tipo"), mensagem: msg,
+        proc_codigo: useCtx?ctxProc.codigo:null, proc_titulo: useCtx?ctxProc.titulo:null
+      });
+      close(); toast("Obrigado! Feedback enviado.");
+    }catch(err){ btn.disabled=false; toast("Erro ao enviar: "+traduzAuthErro(err)); }
+  };
+}
+
+function renderFeedback(){
+  const main=$("#mainContent"); main.innerHTML="";
+  const back=el("button","back-btn"); back.innerHTML=ICON.back+"Voltar à lista";
+  back.onclick=()=>{ VIEW={name:"list"}; renderApp(); };
+  main.appendChild(back);
+  const wrap=el("div","form-card");
+  wrap.innerHTML=`<h2>Feedback e mensagens</h2><p class="hint">Veja o feedback da equipa e responda; ou publique um aviso para todos os enfermeiros.</p>`;
+  main.appendChild(wrap);
+  const novoAviso=el("button","btn small"); novoAviso.style.margin="0 0 14px"; novoAviso.innerHTML=ICON.chat+"Novo aviso a todos os enfermeiros";
+  novoAviso.onclick=()=>avisoModal({mode:"broadcast"});
+  wrap.appendChild(novoAviso);
+  const loading=el("div","result-count","A carregar…"); loading.style.margin="6px 2px"; wrap.appendChild(loading);
+  listFeedback().then(list=>{
+    loading.remove();
+    if(!list.length){ wrap.appendChild(el("div","result-count","Ainda não há feedback.")); return; }
+    const novos=list.filter(f=>f.estado!=="Resolvido").length;
+    const sub=el("div","result-count",`${list.length} no total · ${novos} por tratar`); sub.style.margin="0 2px 12px"; wrap.appendChild(sub);
+    list.forEach(f=>{
+      const row=el("div","fb-row");
+      const tcls="tipo-"+(f.tipo||"").replace(/\s+/g,"");
+      const ecls="est-"+(f.estado||"Novo");
+      row.innerHTML=
+        `<div class="fb-head"><span class="badge ${tcls}">${esc(f.tipo)}</span>`+
+        `<span class="badge ${ecls}">${esc(f.estado||"Novo")}</span>`+
+        (f.proc_titulo?`<span class="badge cat">${esc(f.proc_codigo||"")} ${esc(f.proc_titulo)}</span>`:"")+`</div>`+
+        `<div class="fb-msg">${esc(f.mensagem)}</div>`+
+        `<div class="fb-meta">${esc(f.user_nome||f.user_email||"—")} · ${fmtDateTime(f.created_at)}</div>`;
+      const acts=el("div","fb-actions");
+      if(f.user_id){
+        const r=el("button","btn small secondary"); r.innerHTML=ICON.chat+"Responder";
+        r.onclick=()=>avisoModal({mode:"reply", feedback:f});
+        acts.appendChild(r);
+      }
+      if(f.estado!=="Resolvido"){
+        const b=el("button","btn small"); b.innerHTML=ICON.check+"Marcar resolvido";
+        b.onclick=async ()=>{ try{ await setFeedbackEstado(f.id,"Resolvido"); toast("Marcado como resolvido"); renderFeedback(); }catch(e){ toast("Erro: "+traduzAuthErro(e)); } };
+        acts.appendChild(b);
+      } else {
+        const b=el("button","btn small secondary","Reabrir");
+        b.onclick=async ()=>{ try{ await setFeedbackEstado(f.id,"Novo"); renderFeedback(); }catch(e){ toast("Erro: "+traduzAuthErro(e)); } };
+        acts.appendChild(b);
+      }
+      row.appendChild(acts);
+      wrap.appendChild(row);
+    });
+  }).catch(e=>{ loading.textContent="Erro ao carregar: "+traduzAuthErro(e); });
+}
+
+/* Avisos: vista do enfermeiro + modal de composição (gestor) */
+function renderAvisos(){
+  const main=$("#mainContent"); main.innerHTML="";
+  const back=el("button","back-btn"); back.innerHTML=ICON.back+"Voltar à lista";
+  back.onclick=()=>{ VIEW={name:"list"}; renderApp(); };
+  main.appendChild(back);
+  const wrap=el("div","form-card");
+  wrap.innerHTML=`<h2>Avisos do gestor</h2><p class="hint">Mensagens e respostas da gestão.</p>`;
+  main.appendChild(wrap);
+  const loading=el("div","result-count","A carregar…"); loading.style.margin="6px 2px"; wrap.appendChild(loading);
+  const vistoAntes = myVistoEm()?new Date(myVistoEm()).getTime():0;
+  listAvisos().then(async list=>{
+    loading.remove();
+    if(!list.length){ wrap.appendChild(el("div","result-count","Sem mensagens.")); }
+    else list.forEach(a=>{
+      const unread = new Date(a.created_at).getTime() > vistoAntes;
+      const row=el("div","aviso-row"+(unread?" unread":""));
+      const ctx = (a.tipo==="Resposta" && a.feedback_id) ? `<div class="av-ctx">Resposta a um feedback que enviou</div>` : "";
+      row.innerHTML=`<div class="av-head"><span class="badge tipo-${esc(a.tipo)}">${esc(a.tipo)}</span>${unread?'<span class="badge est-Novo">Novo</span>':''}</div>`+
+        `<div class="av-msg">${esc(a.mensagem)}</div>${ctx}`+
+        `<div class="av-meta">${fmtDateTime(a.created_at)}</div>`;
+      wrap.appendChild(row);
+    });
+    await markAvisosSeen(); UNREAD_AVISOS=0; updateBell();
+  }).catch(e=>{ loading.textContent="Erro ao carregar: "+traduzAuthErro(e); });
+}
+
+function avisoModal(ctx){
+  const root=$("#modalRoot"); const back=el("div","modal-back"); const close=()=>root.innerHTML="";
+  const reply = ctx && ctx.mode==="reply";
+  back.innerHTML=`<div class="modal"><h3>${reply?"Responder ao feedback":"Novo aviso a todos os enfermeiros"}</h3>`+
+    (reply
+      ? `<div class="fb-ctx">A responder a: <b>${esc((ctx.feedback.mensagem||"").slice(0,140))}</b><br><small>${esc(ctx.feedback.user_nome||ctx.feedback.user_email||"")}</small></div>`
+      : `<p style="margin:0 0 12px;color:var(--muted);font-size:.85rem">Será enviado a todos os enfermeiros, com alerta na app.</p>`)+
+    `<form id="avForm" autocomplete="off"><label>Mensagem</label><textarea name="mensagem" required style="min-height:110px" placeholder="${reply?'A sua resposta…':'O aviso para a equipa…'}"></textarea>`+
+    `<div class="row" style="margin-top:16px"><button type="button" class="btn secondary" id="avCancel">Cancelar</button><button type="submit" class="btn" id="avSend">${reply?"Responder":"Publicar aviso"}</button></div></form></div>`;
+  root.appendChild(back);
+  back.onclick=e=>{ if(e.target===back) close(); };
+  back.querySelector("#avCancel").onclick=close;
+  back.querySelector("#avForm").onsubmit=async e=>{
+    e.preventDefault();
+    const msg=(new FormData(e.target).get("mensagem")||"").trim(); if(!msg) return;
+    const btn=back.querySelector("#avSend"); btn.disabled=true;
+    try{
+      if(reply){ await createAviso({tipo:"Resposta", mensagem:msg, destino_user_id:ctx.feedback.user_id, feedback_id:ctx.feedback.id}); }
+      else { await createAviso({tipo:"Aviso", mensagem:msg, destino_user_id:null}); }
+      close(); toast(reply?"Resposta enviada":"Aviso publicado");
+    }catch(err){ btn.disabled=false; toast("Erro: "+traduzAuthErro(err)); }
+  };
+}
+
+/* ============================================================
    MODAL DE CONFIRMAÇÃO
    ============================================================ */
 function confirmModal(title, msg, okLabel, onOk, danger){
@@ -3777,6 +4053,8 @@ document.querySelectorAll(".demo-btn").forEach(b=>{
 });
 $("#logoutBtn").addEventListener("click",logout);
 $("#shareBtn").addEventListener("click",shareModal);
+$("#fabFeedback").addEventListener("click",feedbackModal);
+$("#bellBtn").addEventListener("click",()=>{ VIEW={name:"avisos"}; renderApp(); window.scrollTo(0,0); });
 
 /* ============================================================
    ARRANQUE
