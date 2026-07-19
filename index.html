@@ -2972,7 +2972,9 @@ const INFOGRAFICOS = {
   "SU_PTC_001/00":  "infografico_regulamento_eemi.html",
   "SU_REG_001/00":  "infografico_triagem_manchester.html",
 };
-function infograficoDe(p){ return p && INFOGRAFICOS[p.codigo] ? INFOGRAFICOS[p.codigo] : null; }
+// Preferir o campo guardado no procedimento; recuar para o mapa fixo (7 iniciais).
+function infograficoDe(p){ return (p && ((p.infografico||"").trim() || INFOGRAFICOS[p.codigo])) || null; }
+function isUrl(s){ return /^https?:\/\//i.test(s||""); }
 
 /* ============================================================
    ESTADO / PERSISTÊNCIA
@@ -3023,7 +3025,7 @@ let sb = CLOUD ? window.supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANO
 let _rtChannel = null;
 let LOGIN_MODE = "login"; // "login" | "signup"
 
-const PROC_COLS = ["id","codigo","titulo","categoria","area","versao","data_revisao","estado","link_documento","palavras_chave","responsaveis","resumo","atualizado_por","atualizado_em"];
+const PROC_COLS = ["id","codigo","titulo","categoria","area","versao","data_revisao","estado","link_documento","infografico","palavras_chave","responsaveis","resumo","atualizado_por","atualizado_em"];
 function procToRow(p){
   const r = {};
   PROC_COLS.forEach(k => { r[k] = (p[k] !== undefined ? p[k] : null); });
@@ -3765,6 +3767,7 @@ function openDocument(p){ openStorageDoc(p.link_documento); }
 // (o Storage pode servir .html como text/plain -> mostraria o código).
 function openInfografico(key){
   if(!key){ toast("Infográfico indisponível."); return; }
+  if(isUrl(key)){ window.open(key, "_blank", "noopener"); return; }
   if(CLOUD){
     const w = window.open("", "_blank");
     sb.storage.from("documentos").download(key).then(async ({data, error})=>{
@@ -3853,9 +3856,12 @@ function renderDetail(id){
     frame.onload = ()=>loading.remove();
     wrap.appendChild(frame); wrap.appendChild(loading);
     box.appendChild(wrap);
-    // Nuvem: descarrega o HTML e injeta-o (srcdoc) — é sempre interpretado como
-    // página, mesmo que o Storage sirva o ficheiro como text/plain.
-    if(CLOUD){
+    // Link externo -> carrega direto. Ficheiro no Storage (nuvem) -> descarrega
+    // o HTML e injeta-o (srcdoc), interpretado sempre como página mesmo que o
+    // Storage o sirva como text/plain.
+    if(isUrl(info)){
+      frame.src = info;
+    } else if(CLOUD){
       sb.storage.from("documentos").download(info).then(async ({data,error})=>{
         if(error||!data){ loading.textContent="Infográfico ainda não carregado para o Storage."; return; }
         try{ frame.srcdoc = await data.text(); }
@@ -4002,6 +4008,8 @@ function renderForm(id){
       `<div><label>Data da última revisão *</label><input type="date" name="data_revisao" required value="${p?esc(p.data_revisao):""}"></div>`+
       `<div><label>Link / ficheiro do documento *</label><input name="link_documento" required value="${v("link_documento")}" placeholder="ficheiro.pdf ou https://…"></div>`+
     `</div>`+
+    `<label>Infográfico (opcional)</label><input name="infografico" value="${v("infografico")}" placeholder="infografico.html (ficheiro no Storage) ou https://…">`+
+    `<div class="fb-note" style="margin:2px 0 6px">${ICON.info}<span>Se preencher, substitui o resumo em texto pelo infográfico. Carregue o ficheiro no bucket «documentos» e escreva o nome exato, ou cole um link.</span></div>`+
     `<label>Palavras-chave (separadas por vírgula)</label><input name="palavras_chave" value="${p?esc((p.palavras_chave||[]).join(", ")):""}" placeholder="triagem, prioridade, manchester">`+
     `<label>Responsáveis pelo documento</label><textarea name="responsaveis" placeholder="Nomes dos autores/responsáveis">${p?esc(p.responsaveis||""):""}</textarea>`+
     `<div class="form-sep">Resumo / Operacionalização <span>(apoio rápido — não substitui o PDF; uma linha por tópico nas listas)</span></div>`+
@@ -4029,6 +4037,7 @@ function renderForm(id){
       area: fd.get("area").trim(),
       data_revisao: fd.get("data_revisao"),
       link_documento: fd.get("link_documento").trim(),
+      infografico: (fd.get("infografico")||"").trim() || null,
       palavras_chave: fd.get("palavras_chave").split(",").map(s=>s.trim()).filter(Boolean),
       responsaveis: fd.get("responsaveis").trim()
     };
