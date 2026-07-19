@@ -3749,6 +3749,22 @@ function openStorageDoc(key){
   }
 }
 function openDocument(p){ openStorageDoc(p.link_documento); }
+// Abre um infográfico HTML em separador novo, forçando interpretação como página
+// (o Storage pode servir .html como text/plain -> mostraria o código).
+function openInfografico(key){
+  if(!key){ toast("Infográfico indisponível."); return; }
+  if(CLOUD){
+    const w = window.open("", "_blank");
+    sb.storage.from("documentos").download(key).then(async ({data, error})=>{
+      if(error || !data){ if(w) w.close(); toast("Infográfico ainda não carregado para o Storage."); return; }
+      const url = URL.createObjectURL(new Blob([await data.text()], {type:"text/html"}));
+      if(w) w.location = url; else window.location.href = url;
+      setTimeout(()=>URL.revokeObjectURL(url), 60000);
+    }).catch(()=>{ if(w) w.close(); toast("Não foi possível abrir o infográfico."); });
+  } else {
+    window.open(encodeURI(key), "_blank", "noopener");
+  }
+}
 function docButtonEl(p, secondary){
   const b = el("button", "btn doc-btn"+(secondary?" secondary":""));
   b.innerHTML = ICON.open+"Abrir documento oficial (PDF)";
@@ -3820,22 +3836,25 @@ function renderDetail(id){
     box.innerHTML = `<div class="resumo-flag">${ICON.info}<span>Infográfico de apoio — <b>não substitui</b> o documento oficial. A versão vigente é o PDF.</span></div>`;
     const wrap = el("div","info-frame-wrap");
     const loading = el("div","info-frame-loading","A carregar infográfico…");
-    const frame = el("iframe","info-frame"); frame.setAttribute("title","Infográfico"); frame.setAttribute("loading","lazy");
-    frame.onload = ()=>{ if(frame.src) loading.remove(); };
+    const frame = el("iframe","info-frame"); frame.setAttribute("title","Infográfico");
+    frame.setAttribute("sandbox","allow-scripts allow-popups");
+    frame.onload = ()=>loading.remove();
     wrap.appendChild(frame); wrap.appendChild(loading);
     box.appendChild(wrap);
-    // carregar a fonte: nuvem = signed URL; local = ficheiro relativo
+    // Nuvem: descarrega o HTML e injeta-o (srcdoc) — é sempre interpretado como
+    // página, mesmo que o Storage sirva o ficheiro como text/plain.
     if(CLOUD){
-      sb.storage.from("documentos").createSignedUrl(info, 600).then(({data,error})=>{
+      sb.storage.from("documentos").download(info).then(async ({data,error})=>{
         if(error||!data){ loading.textContent="Infográfico ainda não carregado para o Storage."; return; }
-        frame.src = data.signedUrl;
+        try{ frame.srcdoc = await data.text(); }
+        catch(_){ loading.textContent="Não foi possível ler o infográfico."; }
       }).catch(()=>{ loading.textContent="Não foi possível carregar o infográfico."; });
     } else {
       frame.src = encodeURI(info);
     }
     const acts = el("div","info-actions");
     const openBtn = el("button","btn secondary"); openBtn.innerHTML = ICON.open+"Abrir em separador";
-    openBtn.onclick = ()=>openStorageDoc(info);
+    openBtn.onclick = ()=>openInfografico(info);
     acts.appendChild(openBtn);
     box.appendChild(acts);
     d.appendChild(box);
