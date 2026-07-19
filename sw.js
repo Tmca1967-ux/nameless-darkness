@@ -2,7 +2,7 @@
    Permite instalar a app e funcionar offline.
    IMPORTANTE: ao publicar uma nova versão da app, incrementar CACHE (v1 -> v2…)
    para forçar a atualização dos ficheiros em cache. */
-const CACHE = "su-connect-v4";
+const CACHE = "su-connect-v5";
 const SHELL = [
   "./",
   "./manifest.webmanifest",

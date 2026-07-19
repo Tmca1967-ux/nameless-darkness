@@ -220,6 +220,14 @@
     font-size:.84rem;line-height:1.45;padding:14px 4px}
   .resumo-empty svg,.pdf-note svg{width:18px;height:18px;flex:none;margin-top:1px;color:var(--primary)}
   .resumo-box .doc-btn,.pdf-note{margin-top:8px}
+  /* Infográfico embebido (substitui o resumo em texto) */
+  .info-frame-wrap{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    background:#fff;box-shadow:var(--shadow);margin-top:10px}
+  .info-frame{width:100%;height:72vh;min-height:420px;border:0;display:block;background:#fff}
+  .info-frame-loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);
+    font-size:.9rem;background:var(--surface-2);pointer-events:none}
+  .info-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .info-actions .btn{width:auto}
   .gestor-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px;
     border-top:1px solid var(--line);padding-top:18px}
   @media(min-width:520px){.gestor-actions{grid-template-columns:repeat(3,1fr)}}
@@ -335,6 +343,49 @@
   .aviso-row .av-meta{font-size:.76rem;color:var(--muted);margin-top:8px}
   .badge.tipo-Aviso{background:var(--primary-soft);color:var(--primary-dark)}
   .badge.tipo-Resposta{background:var(--vigente-bg);color:var(--vigente)}
+  /* ---------- Menu inicial (secções) ---------- */
+  .home-head{margin:4px 2px 16px}
+  .home-head h2{margin:0 0 4px;font-size:1.35rem;font-weight:700;letter-spacing:.2px}
+  .home-head p{margin:0;color:var(--muted);font-size:.92rem}
+  .home-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+  .home-tile{display:flex;align-items:center;gap:14px;text-align:left;width:100%;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 16px;box-shadow:var(--shadow);cursor:pointer;transition:transform .12s ease,border-color .12s ease,box-shadow .12s ease;position:relative}
+  .home-tile:hover{transform:translateY(-2px);border-color:var(--primary);box-shadow:0 4px 20px rgba(20,48,58,.12)}
+  .home-tile:active{transform:translateY(0)}
+  .home-ic{flex:none;width:52px;height:52px;border-radius:14px;display:grid;place-items:center;
+    background:var(--primary-soft);color:var(--primary)}
+  .home-ic svg{width:26px;height:26px}
+  .home-tx{flex:1;min-width:0}
+  .home-tx b{display:block;font-size:1.05rem;font-weight:650;color:var(--text);line-height:1.25}
+  .home-tx span{display:block;font-size:.83rem;color:var(--muted);margin-top:2px}
+  .home-arrow{flex:none;color:var(--muted);opacity:.7}
+  .home-arrow svg{width:20px;height:20px;transform:rotate(180deg)}
+  .home-tile .count-badge{flex:none;background:var(--primary-soft);color:var(--primary-dark);
+    font-size:.78rem;font-weight:700;border-radius:20px;padding:2px 10px}
+  .home-tile .dot-alert{top:12px;right:12px}
+  /* estado "sem conteúdo" numa secção */
+  .section-empty{text-align:center;color:var(--muted);padding:36px 16px}
+  .section-empty svg{width:40px;height:40px;opacity:.5;margin-bottom:10px}
+  .section-empty p{margin:0;font-size:.95rem}
+  /* item de conteúdo de secção */
+  .sec-item{display:flex;align-items:stretch;gap:0;background:var(--surface);border:1px solid var(--line);
+    border-radius:12px;margin-bottom:10px;box-shadow:var(--shadow);overflow:hidden}
+  .sec-item:hover{border-color:var(--primary)}
+  .sec-open{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:14px;text-align:left;cursor:pointer;background:none;border:0}
+  .sec-item .home-ic{width:42px;height:42px;border-radius:11px}
+  .sec-item .home-ic svg{width:20px;height:20px}
+  .sec-del{flex:none;width:52px;border:0;border-left:1px solid var(--line);background:var(--surface);
+    color:var(--alerta);display:grid;place-items:center;cursor:pointer}
+  .sec-del:hover{background:var(--alerta-bg)}
+  .sec-del svg{width:18px;height:18px}
+  .home-tx .sec-tel{display:block;font-size:.95rem;font-weight:650;color:var(--primary);margin-top:2px;font-variant-numeric:tabular-nums}
+  /* pontinho vermelho de "feedback novo" no botão Feedback */
+  .btn.has-dot{position:relative;overflow:visible}
+  .dot-alert{position:absolute;top:-5px;right:-5px;width:12px;height:12px;border-radius:50%;
+    background:var(--alerta);border:2px solid var(--surface);box-shadow:0 0 0 1px var(--alerta);
+    animation:dotPulse 1.8s ease-in-out infinite}
+  @keyframes dotPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.25);opacity:.7}}
 </style>
 </head>
 <body>
@@ -384,7 +435,7 @@
       <div class="logo logo-fallback">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M12 8v6M9 11h6"/></svg>
       </div>
-      <h1>SU Connect<small>Serviço de Urgência</small></h1>
+      <h1 id="homeLink" title="Ir para o menu inicial" style="cursor:pointer">SU Connect<small>Serviço de Urgência</small></h1>
       <div class="user-chip">
         <span class="role" id="userRole"></span>
         <button class="btn-ghost hidden bell" id="bellBtn" title="Avisos" aria-label="Avisos">
@@ -2905,6 +2956,20 @@ const RESUMOS = {
 };
 function temResumo(p){ return p && p.resumo && RESUMO_SECOES.some(s=>(p.resumo[s.k]||"").trim()); }
 
+/* Infográficos por procedimento (substituem o resumo em texto onde existem).
+   Chave = código do procedimento; valor = ficheiro no bucket privado "documentos"
+   do Supabase Storage. Funciona em nuvem (signed URL) e local (ficheiro relativo). */
+const INFOGRAFICOS = {
+  "SU_PTC_002/00":  "infografico_via_verde_coronaria.html",
+  "SSST_PRO_001/01":"infografico_acidentes_trabalho.html",
+  "PRO_009/00":     "infografico_dreno_toracico.html",
+  "SU_IDT_001/00":  "infografico_inoperacionalidade_si_su.html",
+  "CQS_PRO_071/01": "infografico_prevencao_queda_adulto.html",
+  "SU_PTC_001/00":  "infografico_regulamento_eemi.html",
+  "SU_REG_001/00":  "infografico_triagem_manchester.html",
+};
+function infograficoDe(p){ return p && INFOGRAFICOS[p.codigo] ? INFOGRAFICOS[p.codigo] : null; }
+
 /* ============================================================
    ESTADO / PERSISTÊNCIA
    ============================================================ */
@@ -2939,7 +3004,7 @@ function resetUsers(){ const fresh = DEFAULT_USERS.map(u=>({...u})); saveUsers(f
 let DB = loadDB();
 let USERS = loadUsers();
 let SESSION = null;
-let VIEW = {name:"list", id:null};
+let VIEW = {name:"menu", id:null};
 let FILTERS = {q:"", categoria:"Todas", estado:"Vigente"}; // estado só usado pelo gestor
 
 /* ============================================================
@@ -2987,11 +3052,19 @@ function subscribeRealtime(){
   _rtChannel = sb.channel("rt-proc")
     .on("postgres_changes", { event:"*", schema:"public", table:"procedimentos" }, async ()=>{
       await loadCloudData();
-      if(SESSION && (VIEW.name==="list" || VIEW.name==="detail")) renderApp();
+      if(SESSION && (VIEW.name==="menu" || VIEW.name==="list" || VIEW.name==="detail")) renderApp();
     })
     .on("postgres_changes", { event:"INSERT", schema:"public", table:"avisos" }, async ()=>{
       await refreshUnread();
-      if(SESSION && VIEW.name==="list") renderApp();
+      if(SESSION && (VIEW.name==="menu" || VIEW.name==="list")) renderApp();
+    })
+    .on("postgres_changes", { event:"*", schema:"public", table:"feedback" }, async ()=>{
+      await refreshUnread();
+      if(SESSION && (VIEW.name==="menu" || VIEW.name==="list" || VIEW.name==="feedback")) renderApp();
+    })
+    .on("postgres_changes", { event:"*", schema:"public", table:"seccao_documentos" }, async ()=>{
+      await loadSeccaoDocs();
+      if(SESSION && (VIEW.name==="menu" || VIEW.name==="section")) renderApp();
     })
     .subscribe();
 }
@@ -3006,9 +3079,10 @@ async function onSignedIn(session){
   const prof = await fetchMyProfile(session.user);
   SESSION = { id:session.user.id, email:prof.email||session.user.email, nome:prof.nome||prof.email||session.user.email, role:prof.role||"enfermeiro", avisos_visto_em:prof.avisos_visto_em||null };
   await loadCloudData();
+  await loadSeccaoDocs();
   subscribeRealtime();
   FILTERS = {q:"",categoria:"Todas",estado:"Vigente"};
-  VIEW = {name:"list",id:null};
+  VIEW = {name:"menu",id:null};
   renderApp();
   refreshUnread();
 }
@@ -3064,19 +3138,27 @@ async function setFeedbackEstado(id, estado){
   if(CLOUD){ const { error } = await sb.from("feedback").update({estado}).eq("id", id); if(error) throw error; }
   else { const arr=JSON.parse(localStorage.getItem(FEEDBACK_LS)||"[]"); const f=arr.find(x=>x.id===id); if(f) f.estado=estado; localStorage.setItem(FEEDBACK_LS, JSON.stringify(arr)); }
 }
+async function deleteFeedback(id){
+  if(CLOUD){ const { error } = await sb.from("feedback").delete().eq("id", id); if(error) throw error; }
+  else { let arr=JSON.parse(localStorage.getItem(FEEDBACK_LS)||"[]"); arr=arr.filter(x=>x.id!==id); localStorage.setItem(FEEDBACK_LS, JSON.stringify(arr)); }
+}
 
 /* Avisos / mensagens do gestor para enfermeiros */
-const AVISOS_LS="su_avisos_local_v1", AVISOS_VISTO_LS="su_avisos_visto_v1";
-let UNREAD_AVISOS = 0;
+const AVISOS_LS="su_avisos_local_v1", AVISOS_VISTO_LS="su_avisos_visto_v1", AVISOS_HIDDEN_LS="su_avisos_hidden_v1";
+let UNREAD_AVISOS = 0, UNREAD_FEEDBACK = 0;
+function hiddenAvisoIds(){ try{ return JSON.parse(localStorage.getItem(AVISOS_HIDDEN_LS)||"[]"); }catch(_){ return []; } }
+function hideAviso(id){ const s=new Set(hiddenAvisoIds()); s.add(id); localStorage.setItem(AVISOS_HIDDEN_LS, JSON.stringify([...s])); }
 async function createAviso(a){
   const row={ tipo:a.tipo||"Aviso", mensagem:a.mensagem, destino_user_id:a.destino_user_id||null, feedback_id:a.feedback_id||null, created_by:SESSION.id||null };
   if(CLOUD){ const { error } = await sb.from("avisos").insert(row); if(error) throw error; }
   else { const arr=JSON.parse(localStorage.getItem(AVISOS_LS)||"[]"); arr.unshift({...row,id:"A"+Date.now(),created_at:new Date().toISOString()}); localStorage.setItem(AVISOS_LS,JSON.stringify(arr)); }
 }
 async function listAvisos(){
-  if(CLOUD){ const { data, error } = await sb.from("avisos").select("*").order("created_at",{ascending:false}); if(error) throw error; return data||[]; }
-  const arr=JSON.parse(localStorage.getItem(AVISOS_LS)||"[]");
-  return arr.filter(x=> x.destino_user_id==null || x.destino_user_id===SESSION.id);
+  let arr;
+  if(CLOUD){ const { data, error } = await sb.from("avisos").select("*").order("created_at",{ascending:false}); if(error) throw error; arr=data||[]; }
+  else { arr=JSON.parse(localStorage.getItem(AVISOS_LS)||"[]").filter(x=> x.destino_user_id==null || x.destino_user_id===SESSION.id); }
+  const hid=new Set(hiddenAvisoIds());
+  return arr.filter(a=> !hid.has(a.id));
 }
 function myVistoEm(){ return CLOUD ? (SESSION.avisos_visto_em||null) : (localStorage.getItem(AVISOS_VISTO_LS)||null); }
 async function markAvisosSeen(){
@@ -3086,11 +3168,26 @@ async function markAvisosSeen(){
 }
 async function refreshUnread(){
   if(SESSION && !isGestor()){
+    UNREAD_FEEDBACK=0;
     try{ const list=await listAvisos(); const v=myVistoEm()?new Date(myVistoEm()).getTime():0;
       UNREAD_AVISOS = list.filter(a=> new Date(a.created_at).getTime() > v).length; }
     catch(e){ UNREAD_AVISOS=0; }
-  } else UNREAD_AVISOS=0;
+  } else if(SESSION && isGestor()){
+    UNREAD_AVISOS=0;
+    try{ const list=await listFeedback(); UNREAD_FEEDBACK = list.filter(f=> (f.estado||"Novo")!=="Resolvido").length; }
+    catch(e){ UNREAD_FEEDBACK=0; }
+  } else { UNREAD_AVISOS=0; UNREAD_FEEDBACK=0; }
   updateBell();
+  updateAppBadge();
+  if(SESSION && (VIEW.name==="list" || VIEW.name==="menu")) renderApp(); // reflete o ponto/banner
+}
+function updateAppBadge(){
+  try{
+    if(!('setAppBadge' in navigator)) return;
+    const n = (SESSION ? (isGestor()? UNREAD_FEEDBACK : UNREAD_AVISOS) : 0)|0;
+    if(n>0) navigator.setAppBadge(n).catch(()=>{});
+    else if(navigator.clearAppBadge) navigator.clearAppBadge().catch(()=>{});
+  }catch(_){}
 }
 function updateBell(){
   const b=$("#bellBtn"), c=$("#bellCount"); if(!b) return;
@@ -3185,8 +3282,78 @@ const ICON = {
   key:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.6 7.6a5 5 0 1 0-1.4 1.4l3.5 3.5L16 16l2 2 3-3-7.6-7.4z"/></svg>',
   shield:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg>',
   chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
-  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
+  heart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.5 1-1a5.5 5.5 0 0 0 0-7.9z"/><path d="M3.5 12h4l1.5-3 3 6 1.5-3h4" stroke-width="1.6"/></svg>',
+  pill:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 20.5a5 5 0 0 1-7-7l6-6a5 5 0 0 1 7 7z"/><path d="M8.5 8.5l7 7"/></svg>',
+  bolt:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>',
+  phone:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.1-1.1a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></svg>',
+  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>'
 };
+
+/* ============================================================
+   MENU INICIAL — secções
+   ============================================================ */
+// Config das secções. O conteúdo de cada secção (documentos/itens) é adicionado
+// em SECTION_CONTENT; para já as novas secções estão vazias (a preencher).
+const SECTIONS = [
+  { key:"procedimentos", label:"Procedimentos",        desc:"Procedimentos clínicos do SU",        icon:ICON.doc   },
+  { key:"sav",           label:"Algoritmos de SAV",     desc:"Suporte Avançado de Vida",            icon:ICON.heart },
+  { key:"farmacos",      label:"Fármacos de Urgência",  desc:"Doses, diluições e administração",    icon:ICON.pill  },
+  { key:"checklists",    label:"Check Lists",           desc:"Listas de verificação",               icon:ICON.check },
+  { key:"instrucoes",    label:"Instruções Rápidas",    desc:"Guias e instruções rápidas",          icon:ICON.bolt  },
+  { key:"contactos",     label:"Contactos",             desc:"Contactos úteis do serviço",          icon:ICON.phone },
+];
+// Conteúdo por secção (exceto "procedimentos", que usa a base de dados existente).
+// Cada item: { titulo, descricao, link } — link abre num novo separador (URL ou PDF).
+// Preencher à medida que o conteúdo for fornecido.
+const SECTION_CONTENT = {
+  // it.doc = chave do ficheiro no bucket privado "documentos" do Supabase Storage.
+  sav: [
+    { titulo:"Suporte Básico de Vida (SBV)",   descricao:"Algoritmo de SBV no adulto",                doc:"Algoritmo-de-Suporte-Basico-de-Vida.pdf" },
+    { titulo:"Suporte Avançado de Vida (SAV)", descricao:"Algoritmo de SAV no adulto",                doc:"Algoritmo-de-Suporte-Avancado-de-Vida.pdf" },
+    { titulo:"Reanimação Intra-Hospitalar",    descricao:"Resposta à paragem cardiorrespiratória no hospital", doc:"Algoritmo-Reanimacao-Intra-Hospitalar.pdf" },
+    { titulo:"Bradicardia",                    descricao:"Algoritmo de abordagem da bradicardia",     doc:"Algoritmo-de-Bradicardia.pdf" },
+    { titulo:"Taquicardia",                    descricao:"Algoritmo de abordagem da taquicardia",     doc:"Algoritmo-Taquicardia.pdf" },
+    { titulo:"Cuidados Pós-Reanimação — 1",    descricao:"Algoritmo de cuidados pós-reanimação",      doc:"Algoritmo-de-Cuidados-Pos-Reanimacao-01.pdf" },
+    { titulo:"Cuidados Pós-Reanimação — 2",    descricao:"Algoritmo de cuidados pós-reanimação",      doc:"Algoritmo-de-Cuidados-Pos-Reanimacao-02.pdf" },
+    { titulo:"Cuidados Pós-Reanimação — 3",    descricao:"Algoritmo de cuidados pós-reanimação",      doc:"Algoritmo-de-Cuidados-Pos-Reanimacao-04.pdf" },
+  ],
+  farmacos: [],
+  checklists: [],
+  instrucoes: [],
+  contactos: [],
+};
+
+/* Documentos das secções adicionados pelo gestor (partilhados via Supabase,
+   tabela "seccao_documentos"; em modo local ficam em localStorage).
+   Cada linha: { id, seccao, titulo, descricao, doc, url }. */
+const SECCAO_DOCS_LS = "su_seccao_docs_local_v1";
+let SECCAO_DB = [];
+async function listSeccaoDocs(){
+  if(CLOUD){
+    const { data, error } = await sb.from("seccao_documentos").select("*")
+      .order("ordem",{ascending:true}).order("created_at",{ascending:true});
+    if(error) throw error; return data||[];
+  }
+  return JSON.parse(localStorage.getItem(SECCAO_DOCS_LS)||"[]");
+}
+async function loadSeccaoDocs(){ try{ SECCAO_DB = await listSeccaoDocs(); }catch(e){ SECCAO_DB = []; } }
+function refreshSeccao(){ loadSeccaoDocs().then(()=>{ if(SESSION && (VIEW.name==="menu" || VIEW.name==="section")) renderApp(); }); }
+async function createSeccaoDoc(row){
+  const clean = { seccao:row.seccao, titulo:row.titulo, descricao:row.descricao||null, doc:row.doc||null, url:row.url||null };
+  if(CLOUD){ const { error } = await sb.from("seccao_documentos").insert({...clean, created_by:SESSION.id||null}); if(error) throw error; }
+  else { const arr=JSON.parse(localStorage.getItem(SECCAO_DOCS_LS)||"[]"); arr.push({id:"S"+Date.now(), ...clean, created_at:new Date().toISOString()}); localStorage.setItem(SECCAO_DOCS_LS, JSON.stringify(arr)); }
+}
+async function deleteSeccaoDoc(id){
+  if(CLOUD){ const { error } = await sb.from("seccao_documentos").delete().eq("id", id); if(error) throw error; }
+  else { let arr=JSON.parse(localStorage.getItem(SECCAO_DOCS_LS)||"[]"); arr=arr.filter(x=>x.id!==id); localStorage.setItem(SECCAO_DOCS_LS, JSON.stringify(arr)); }
+}
+// itens de uma secção: conteúdo fixo (código) + documentos do gestor (BD)
+function seccaoItens(key){
+  const fixos = (SECTION_CONTENT[key]||[]).map(x=>({...x, _fixo:true}));
+  const dbs = SECCAO_DB.filter(d=>d.seccao===key).map(d=>({titulo:d.titulo, descricao:d.descricao, doc:d.doc, url:d.url, id:d.id, _fixo:false}));
+  return [...fixos, ...dbs];
+}
 
 /* ============================================================
    AUTENTICAÇÃO
@@ -3203,7 +3370,7 @@ function login(email, pass){
 }
 function logout(){
   if(CLOUD && sb){ sb.auth.signOut(); return; } // onAuthStateChange repõe o ecrã
-  SESSION=null; sessionStorage.removeItem(SS_KEY); FILTERS={q:"",categoria:"Todas",estado:"Vigente"}; VIEW={name:"list",id:null}; renderApp();
+  SESSION=null; sessionStorage.removeItem(SS_KEY); FILTERS={q:"",categoria:"Todas",estado:"Vigente"}; VIEW={name:"menu",id:null}; renderApp();
 }
 const isGestor = () => SESSION && SESSION.role==="gestor";
 
@@ -3245,15 +3412,164 @@ function renderApp(){
   $("#appView").classList.remove("hidden");
   $("#userRole").textContent = isGestor() ? "Gestor" : "Enfermeiro";
   $("#footMeta").textContent = `${DB.length} procedimentos · sessão: ${SESSION.nome}`;
-  if(VIEW.name==="detail") renderDetail(VIEW.id);
+  if(VIEW.name==="menu") renderMenu();
+  else if(VIEW.name==="detail") renderDetail(VIEW.id);
   else if(VIEW.name==="form") renderForm(VIEW.id);
+  else if(VIEW.name==="section") renderSection(VIEW.id);
   else if(VIEW.name==="users" && isGestor()) renderUsers();
   else if(VIEW.name==="feedback" && isGestor()) renderFeedback();
   else if(VIEW.name==="avisos") renderAvisos();
   else renderList();
-  // FAB de feedback visível na lista e no detalhe
-  $("#fabFeedback").classList.toggle("hidden", !(VIEW.name==="list" || VIEW.name==="detail"));
+  // FAB de feedback visível no menu, lista, detalhe e secções
+  $("#fabFeedback").classList.toggle("hidden", !(VIEW.name==="menu" || VIEW.name==="list" || VIEW.name==="detail" || VIEW.name==="section"));
   updateBell();
+}
+
+/* ============================================================
+   RENDER — MENU INICIAL
+   ============================================================ */
+function renderMenu(){
+  const main=$("#mainContent"); main.innerHTML="";
+  const fpn=fileProtocolNotice(); if(fpn) main.appendChild(fpn);
+  // enfermeiro: banner de mensagens por ler
+  if(!isGestor() && UNREAD_AVISOS>0){
+    const ab=el("div","avisos-banner");
+    ab.innerHTML=ICON.chat+`<span>Tem <b>${UNREAD_AVISOS}</b> nova(s) mensagem(ns) do gestor.</span><button id="verAvisos">Ver</button>`;
+    main.appendChild(ab);
+    ab.querySelector("#verAvisos").onclick=()=>{ VIEW={name:"avisos"}; renderApp(); window.scrollTo(0,0); };
+  }
+  const head=el("div","home-head");
+  head.innerHTML=`<h2>Olá, ${esc((SESSION.nome||"").split(" ")[0]||SESSION.nome||"")}</h2><p>Escolha uma secção.</p>`;
+  main.appendChild(head);
+  const grid=el("div","home-grid");
+  SECTIONS.forEach(s=>{
+    const tile=el("button","home-tile");
+    let badge="";
+    if(s.key==="procedimentos"){
+      const n = isGestor()? DB.length : DB.filter(p=>p.estado==="Vigente").length;
+      badge=`<span class="count-badge">${n}</span>`;
+      if(isGestor() && UNREAD_FEEDBACK>0) badge+=`<span class="dot-alert" title="Feedback novo por tratar"></span>`;
+    } else {
+      const n=seccaoItens(s.key).length;
+      if(n) badge=`<span class="count-badge">${n}</span>`;
+    }
+    tile.innerHTML=`<span class="home-ic">${s.icon}</span>`+
+      `<span class="home-tx"><b>${esc(s.label)}</b><span>${esc(s.desc)}</span></span>`+
+      badge+`<span class="home-arrow">${ICON.back}</span>`;
+    tile.onclick=()=>{
+      VIEW = (s.key==="procedimentos") ? {name:"list"} : {name:"section", id:s.key};
+      renderApp(); window.scrollTo(0,0);
+    };
+    grid.appendChild(tile);
+  });
+  main.appendChild(grid);
+}
+
+function renderSection(key){
+  const sec=SECTIONS.find(s=>s.key===key);
+  const main=$("#mainContent"); main.innerHTML="";
+  const back=el("button","back-btn"); back.innerHTML=ICON.back+"Voltar ao menu";
+  back.onclick=()=>{ VIEW={name:"menu"}; renderApp(); window.scrollTo(0,0); };
+  main.appendChild(back);
+  const head=el("div","home-head");
+  head.innerHTML=`<h2>${esc(sec?sec.label:key)}</h2><p>${esc(sec?sec.desc:"")}</p>`;
+  main.appendChild(head);
+  const isContactos = key==="contactos";
+  // gestor: adicionar documento/contacto a esta secção
+  if(isGestor()){
+    const add=el("button","btn small"); add.style.margin="0 0 14px";
+    add.innerHTML=ICON.plus+(isContactos?"Adicionar contacto":"Adicionar documento");
+    add.onclick=()=>seccaoDocModal(key);
+    main.appendChild(add);
+  }
+  const items=seccaoItens(key);
+  if(!items.length){
+    const empty=el("div","section-empty");
+    const dica=isGestor()?(isContactos?"<br>Use <b>Adicionar contacto</b>.":"<br>Use <b>Adicionar documento</b>."):"<br>Será adicionado em breve.";
+    empty.innerHTML=ICON.doc+`<p>Ainda não há ${isContactos?"contactos":"conteúdo"} nesta secção.${dica}</p>`;
+    main.appendChild(empty);
+    return;
+  }
+  items.forEach(it=>{
+    const row=el("div","sec-item");
+    const open=el("div","sec-open");
+    // Contacto: url = "tel:<número>"; mostra número (clicável) + função na 2ª linha.
+    const tel = (it.url && /^tel:/i.test(it.url)) ? it.url.replace(/^tel:/i,"") : null;
+    let sub;
+    if(isContactos && tel){
+      sub = `<span class="sec-tel">${esc(tel)}</span>${it.descricao?`<span>${esc(it.descricao)}</span>`:""}`;
+    } else {
+      sub = it.descricao?`<span>${esc(it.descricao)}</span>`:"";
+    }
+    const actIcon = (isContactos && tel) ? ICON.phone : ICON.open;
+    open.innerHTML=`<span class="home-ic">${sec?sec.icon:ICON.doc}</span>`+
+      `<span class="home-tx"><b>${esc(it.titulo)}</b>${sub}</span>`+
+      `<span class="home-arrow">${actIcon}</span>`;
+    // ação ao tocar: contacto -> marcar número; doc -> Storage; url -> link externo
+    if(isContactos && tel) open.onclick=()=>{ window.location.href = it.url; };
+    else if(it.doc) open.onclick=()=>openStorageDoc(it.doc);
+    else if(it.url||it.link) open.onclick=()=>window.open(it.url||it.link,"_blank","noopener");
+    row.appendChild(open);
+    // gestor: apagar itens adicionados por si (não os fixos do código)
+    if(isGestor() && !it._fixo && it.id){
+      const del=el("button","sec-del"); del.title="Apagar"; del.setAttribute("aria-label","Apagar"); del.innerHTML=ICON.trash;
+      del.onclick=(e)=>{ e.stopPropagation(); confirmModal(isContactos?"Apagar este contacto?":"Apagar este documento?","Será removido desta secção para todos.","Apagar",async ()=>{
+        try{ await deleteSeccaoDoc(it.id); toast(isContactos?"Contacto apagado":"Documento apagado"); await loadSeccaoDocs(); renderSection(key); }
+        catch(err){ toast("Erro ao apagar: "+traduzAuthErro(err)); }
+      }, true); };
+      row.appendChild(del);
+    }
+    main.appendChild(row);
+  });
+}
+
+function seccaoDocModal(key){
+  const sec=SECTIONS.find(s=>s.key===key);
+  const isContactos = key==="contactos";
+  const root=$("#modalRoot"); const back=el("div","modal-back"); const close=()=>root.innerHTML="";
+  const form = isContactos
+    ? `<form id="sdForm" autocomplete="off">`+
+        `<label>Nome</label><input name="titulo" required placeholder="Ex.: Cardiologia — Banco">`+
+        `<label>Telefone / Extensão</label><input name="tel" type="tel" required placeholder="Ex.: 912345678 ou 2345">`+
+        `<label>Função / Serviço (opcional)</label><input name="descricao" placeholder="Ex.: Médico de urgência interna">`+
+        `<div class="row" style="margin-top:16px"><button type="button" class="btn secondary" id="sdCancel">Cancelar</button><button type="submit" class="btn" id="sdSave">Guardar</button></div>`+
+      `</form>`
+    : `<form id="sdForm" autocomplete="off">`+
+        `<label>Título</label><input name="titulo" required placeholder="Ex.: Diluição de aminas">`+
+        `<label>Descrição (opcional)</label><input name="descricao" placeholder="Breve descrição">`+
+        `<label>Ficheiro no Storage (bucket «documentos»)</label><input name="doc" placeholder="ex.: nome-do-ficheiro.pdf">`+
+        `<div class="fb-note" style="margin:2px 0 6px">${ICON.info}<span>Carregue primeiro o ficheiro no bucket «documentos» do Supabase e escreva aqui o nome exato. Em alternativa, deixe em branco e use um link.</span></div>`+
+        `<label>OU Link externo (URL)</label><input name="url" placeholder="https://…">`+
+        `<div class="row" style="margin-top:16px"><button type="button" class="btn secondary" id="sdCancel">Cancelar</button><button type="submit" class="btn" id="sdSave">Guardar</button></div>`+
+      `</form>`;
+  back.innerHTML=`<div class="modal"><h3>${isContactos?"Adicionar contacto":"Adicionar documento"}</h3>`+
+    `<p style="margin:0 0 12px;color:var(--muted);font-size:.85rem">Secção: <b>${esc(sec?sec.label:key)}</b></p>`+
+    form+`</div>`;
+  root.appendChild(back);
+  back.onclick=e=>{ if(e.target===back) close(); };
+  back.querySelector("#sdCancel").onclick=close;
+  back.querySelector("#sdForm").onsubmit=async e=>{
+    e.preventDefault();
+    const fd=new FormData(e.target);
+    const titulo=(fd.get("titulo")||"").trim();
+    if(!titulo) return;
+    let payload;
+    if(isContactos){
+      const tel=(fd.get("tel")||"").trim();
+      if(!tel){ toast("Indique o telefone/extensão."); return; }
+      payload={ seccao:key, titulo, descricao:(fd.get("descricao")||"").trim(), doc:null, url:"tel:"+tel };
+    } else {
+      let doc=(fd.get("doc")||"").trim(); let url=(fd.get("url")||"").trim();
+      if(!doc && !url){ toast("Indique um ficheiro do Storage ou um link."); return; }
+      if(doc && url) url=""; // ficheiro tem prioridade
+      payload={ seccao:key, titulo, descricao:(fd.get("descricao")||"").trim(), doc:doc||null, url:url||null };
+    }
+    const btn=back.querySelector("#sdSave"); btn.disabled=true;
+    try{
+      await createSeccaoDoc(payload);
+      close(); toast(isContactos?"Contacto adicionado":"Documento adicionado"); await loadSeccaoDocs(); renderSection(key);
+    }catch(err){ btn.disabled=false; toast("Erro ao guardar: "+traduzAuthErro(err)); }
+  };
 }
 
 /* ============================================================
@@ -3261,6 +3577,10 @@ function renderApp(){
    ============================================================ */
 function renderList(){
   const main = $("#mainContent"); main.innerHTML="";
+
+  const backM=el("button","back-btn"); backM.innerHTML=ICON.back+"Voltar ao menu";
+  backM.onclick=()=>{ VIEW={name:"menu"}; renderApp(); window.scrollTo(0,0); };
+  main.appendChild(backM);
 
   const fpn = fileProtocolNotice(); if(fpn) main.appendChild(fpn);
 
@@ -3335,7 +3655,8 @@ function renderList(){
     const usersBtn = el("button","btn small secondary"); usersBtn.innerHTML = ICON.users+"Gerir contas";
     usersBtn.onclick=()=>{ VIEW={name:"users"}; renderApp(); window.scrollTo(0,0); };
     addBar.appendChild(usersBtn);
-    const fbBtn = el("button","btn small secondary"); fbBtn.innerHTML = ICON.chat+"Feedback";
+    const fbBtn = el("button","btn small secondary"+(UNREAD_FEEDBACK>0?" has-dot":""));
+    fbBtn.innerHTML = ICON.chat+"Feedback"+(UNREAD_FEEDBACK>0?`<span class="dot-alert" title="Feedback novo por tratar"></span>`:"");
     fbBtn.onclick=()=>{ VIEW={name:"feedback"}; renderApp(); window.scrollTo(0,0); };
     addBar.appendChild(fbBtn);
     if(CLOUD){
@@ -3412,17 +3733,22 @@ function cardEl(p){
 
 /* Abrir o documento: nuvem -> link assinado temporário do Storage (só autenticados);
    local -> ficheiro relativo na pasta. */
-function openDocument(p){
+// Abre um PDF guardado no bucket privado "documentos" por signed URL (nuvem);
+// em modo local abre o ficheiro relativo (dev). Reutilizado pelos procedimentos
+// e pelas secções (ex.: Algoritmos de SAV).
+function openStorageDoc(key){
+  if(!key){ toast("Documento indisponível."); return; }
   if(CLOUD){
     const w = window.open("", "_blank"); // abrir já, no gesto do utilizador (evita bloqueio de pop-ups)
-    sb.storage.from("documentos").createSignedUrl(p.link_documento, 120).then(({data, error})=>{
+    sb.storage.from("documentos").createSignedUrl(key, 120).then(({data, error})=>{
       if(error || !data){ if(w) w.close(); toast("Documento ainda não carregado para o Storage."); return; }
       if(w) w.location = data.signedUrl; else window.location.href = data.signedUrl;
     }).catch(()=>{ if(w) w.close(); toast("Não foi possível abrir o documento."); });
   } else {
-    window.open(encodeURI(p.link_documento), "_blank", "noopener");
+    window.open(encodeURI(key), "_blank", "noopener");
   }
 }
+function openDocument(p){ openStorageDoc(p.link_documento); }
 function docButtonEl(p, secondary){
   const b = el("button", "btn doc-btn"+(secondary?" secondary":""));
   b.innerHTML = ICON.open+"Abrir documento oficial (PDF)";
@@ -3461,9 +3787,10 @@ function renderDetail(id){
   }
   d.innerHTML = html;
 
-  // alternância de vistas: Resumo  /  Documento (PDF)
+  // alternância de vistas: Resumo/Infográfico  /  Documento (PDF)
+  const info = infograficoDe(p);
   const tabs = el("div","view-tabs");
-  const tabResumo = el("button","view-tab"+(VIEW.tab!=="pdf"?" active":""),"Resumo");
+  const tabResumo = el("button","view-tab"+(VIEW.tab!=="pdf"?" active":""), info?"Infográfico":"Resumo");
   const tabPdf = el("button","view-tab"+(VIEW.tab==="pdf"?" active":""),"Documento (PDF)");
   tabResumo.onclick=()=>{ VIEW.tab="resumo"; renderApp(); };
   tabPdf.onclick=()=>{ VIEW.tab="pdf"; renderApp(); };
@@ -3487,6 +3814,34 @@ function renderDetail(id){
       dm.innerHTML = ICON.alert+`Documento ainda não carregado nesta interface (referência: <b>${esc(p.link_documento)}</b>). Consultar no sistema institucional.`;
       d.appendChild(dm);
     }
+  } else if(info){
+    // vista de infográfico (substitui o resumo em texto)
+    const box = el("div","resumo-box");
+    box.innerHTML = `<div class="resumo-flag">${ICON.info}<span>Infográfico de apoio — <b>não substitui</b> o documento oficial. A versão vigente é o PDF.</span></div>`;
+    const wrap = el("div","info-frame-wrap");
+    const loading = el("div","info-frame-loading","A carregar infográfico…");
+    const frame = el("iframe","info-frame"); frame.setAttribute("title","Infográfico"); frame.setAttribute("loading","lazy");
+    frame.onload = ()=>{ if(frame.src) loading.remove(); };
+    wrap.appendChild(frame); wrap.appendChild(loading);
+    box.appendChild(wrap);
+    // carregar a fonte: nuvem = signed URL; local = ficheiro relativo
+    if(CLOUD){
+      sb.storage.from("documentos").createSignedUrl(info, 600).then(({data,error})=>{
+        if(error||!data){ loading.textContent="Infográfico ainda não carregado para o Storage."; return; }
+        frame.src = data.signedUrl;
+      }).catch(()=>{ loading.textContent="Não foi possível carregar o infográfico."; });
+    } else {
+      frame.src = encodeURI(info);
+    }
+    const acts = el("div","info-actions");
+    const openBtn = el("button","btn secondary"); openBtn.innerHTML = ICON.open+"Abrir em separador";
+    openBtn.onclick = ()=>openStorageDoc(info);
+    acts.appendChild(openBtn);
+    box.appendChild(acts);
+    d.appendChild(box);
+    // atalho para o PDF oficial
+    if(CLOUD){ d.appendChild(docButtonEl(p,true)); }
+    else if(present){ const a=el("a","btn secondary doc-btn"); a.href=encodeURI(p.link_documento); a.target="_blank"; a.rel="noopener"; a.innerHTML=ICON.open+"Abrir documento oficial (PDF)"; d.appendChild(a); }
   } else {
     // vista de resumo / operacionalização
     if(temResumo(p)){
@@ -3879,13 +4234,19 @@ function renderFeedback(){
       }
       if(f.estado!=="Resolvido"){
         const b=el("button","btn small"); b.innerHTML=ICON.check+"Marcar resolvido";
-        b.onclick=async ()=>{ try{ await setFeedbackEstado(f.id,"Resolvido"); toast("Marcado como resolvido"); renderFeedback(); }catch(e){ toast("Erro: "+traduzAuthErro(e)); } };
+        b.onclick=async ()=>{ try{ await setFeedbackEstado(f.id,"Resolvido"); toast("Marcado como resolvido"); await refreshUnread(); renderFeedback(); }catch(e){ toast("Erro: "+traduzAuthErro(e)); } };
         acts.appendChild(b);
       } else {
         const b=el("button","btn small secondary","Reabrir");
-        b.onclick=async ()=>{ try{ await setFeedbackEstado(f.id,"Novo"); renderFeedback(); }catch(e){ toast("Erro: "+traduzAuthErro(e)); } };
+        b.onclick=async ()=>{ try{ await setFeedbackEstado(f.id,"Novo"); await refreshUnread(); renderFeedback(); }catch(e){ toast("Erro: "+traduzAuthErro(e)); } };
         acts.appendChild(b);
       }
+      const del=el("button","btn small danger"); del.innerHTML=ICON.trash+"Apagar";
+      del.onclick=()=>confirmModal("Apagar este feedback?","A mensagem será removida para todos. Esta ação não pode ser anulada.","Apagar",async ()=>{
+        try{ await deleteFeedback(f.id); toast("Feedback apagado"); await refreshUnread(); renderFeedback(); }
+        catch(e){ toast("Erro ao apagar: "+traduzAuthErro(e)); }
+      }, true);
+      acts.appendChild(del);
       row.appendChild(acts);
       wrap.appendChild(row);
     });
@@ -3913,6 +4274,12 @@ function renderAvisos(){
       row.innerHTML=`<div class="av-head"><span class="badge tipo-${esc(a.tipo)}">${esc(a.tipo)}</span>${unread?'<span class="badge est-Novo">Novo</span>':''}</div>`+
         `<div class="av-msg">${esc(a.mensagem)}</div>${ctx}`+
         `<div class="av-meta">${fmtDateTime(a.created_at)}</div>`;
+      const acts=el("div","fb-actions");
+      const del=el("button","btn small danger"); del.innerHTML=ICON.trash+"Apagar";
+      del.onclick=()=>confirmModal("Apagar esta mensagem?","A mensagem deixa de aparecer no seu ecrã (não afeta os outros enfermeiros).","Apagar",async ()=>{
+        hideAviso(a.id); toast("Mensagem apagada"); await refreshUnread(); renderAvisos();
+      }, true);
+      acts.appendChild(del); row.appendChild(acts);
       wrap.appendChild(row);
     });
     await markAvisosSeen(); UNREAD_AVISOS=0; updateBell();
@@ -4044,7 +4411,7 @@ $("#loginForm").addEventListener("submit", async (e)=>{
   }
   // modo local (sem nuvem configurada)
   const ok = login(email, pass);
-  if(ok){ er.classList.add("hidden"); $("#pass").value=""; VIEW={name:"list",id:null}; renderApp(); }
+  if(ok){ er.classList.add("hidden"); $("#pass").value=""; VIEW={name:"menu",id:null}; renderApp(); refreshUnread(); refreshSeccao(); }
   else { er.textContent="Email ou palavra-passe incorretos."; er.classList.remove("hidden"); }
 });
 $("#authToggle").addEventListener("click", ()=> setLoginMode(LOGIN_MODE==="login"?"signup":"login"));
@@ -4053,6 +4420,7 @@ document.querySelectorAll(".demo-btn").forEach(b=>{
 });
 $("#logoutBtn").addEventListener("click",logout);
 $("#shareBtn").addEventListener("click",shareModal);
+$("#homeLink").addEventListener("click",()=>{ if(SESSION){ VIEW={name:"menu",id:null}; renderApp(); window.scrollTo(0,0); } });
 $("#fabFeedback").addEventListener("click",feedbackModal);
 $("#bellBtn").addEventListener("click",()=>{ VIEW={name:"avisos"}; renderApp(); window.scrollTo(0,0); });
 
@@ -4078,7 +4446,7 @@ $("#installBtn").addEventListener("click", async ()=>{
 });
 
 if(CLOUD){ setupLoginUI(); bootCloud(); }
-else { restoreSession(); renderApp(); }
+else { restoreSession(); renderApp(); refreshUnread(); refreshSeccao(); }
 </script>
 </body>
 </html>
